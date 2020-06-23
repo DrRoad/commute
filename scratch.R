@@ -19,11 +19,11 @@ plot(g2)
 
 tg <- make_empty_graph()
 
-work_travel %>% select(SA2_code_usual_residence_address, SA2_code_workplace_address) %>% 
+work_travel %>% filter(Total > 100) %>% select(SA2_name_usual_residence_address, SA2_name_workplace_address) %>% 
   as.matrix %>% t %>% as.vector -> elist
 
 locgraph <- graph(edges = elist)
 
-plot(locgraph, label = NA)
+# plot(locgraph, label = NA)
 
 sg <- decompose(locgraph, mode="weak")
