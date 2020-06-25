@@ -1,7 +1,8 @@
 library(rgdal)
 library(rmapshaper)
 
-sf <- readOGR(dsn = "shapefiles/statsnzstatistical-area-2-2018-generalised-SHP/")
+# sf <- readOGR(dsn = "shapefiles/statsnzstatistical-area-2-2018-generalised-SHP/")
+sf <- readOGR(dsn = "shapefiles/SA2-2018-WGS/")
 nrow(sf@data)
 
 plot(sf, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
@@ -23,14 +24,15 @@ ssf3 <- ms_simplify(sf, 0.002, keep_shapes=TRUE)
 plot(ssf3, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
 nrow(ssf3@data)
 
-writeOGR(ssf2.5, dsn = "shapefiles/sa20025/", layer = "SA2", driver="ESRI Shapefile")
+writeOGR(ssf2.5, dsn = "shapefiles/sa20025WGS/", layer = "SA2", driver="ESRI Shapefile")
 
 ssf3b <- ms_simplify(sf, 0.002, keep_shapes=FALSE)
 plot(ssf3b, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
 nrow(ssf3b@data)
 
+ci <- sf@data$SA22018__1 != "Chatham Islands"
 head(ssf2.5@data)
 laper <- (sf@data$LAND_AREA_ / sf@data$AREA_SQ_KM)
 sf@data$SA22018__1[laper > 0.1 & laper < 0.4]
-plot(ssf2.5[laper > 0.1,])
-writeOGR(ssf2.5[laper > 0.1,], dsn = "shapefiles/sa20025fil/", layer = "SA2", driver="ESRI Shapefile")
+plot(ssf2.5[(laper > 0.1) & ci,])
+writeOGR(ssf2.5[(laper > 0.1) & ci,], dsn = "shapefiles/sa20025WGSfil/", layer = "SA2", driver="ESRI Shapefile")
