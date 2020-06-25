@@ -2,16 +2,17 @@ library(shiny)
 library(leaflet)
 library(rgdal)
 
-sf <- readOGR(dsn="../shapefiles/sa20025WGSfil")
-crs <- leafletCRS(proj4def = sf@proj4string,
-                  bounds=sf@bbox)
-leaflet(sf) %>% addPolygons()
+sf <- readOGR(dsn="../shapefiles/sa20025WGSfilcth")
+leaflet(sf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
+  addPolygons(color="#000", opacity = 1, weight=1,
+                            popup = sf@data$SA22018__1) %>%
+  setView(174, -41, 5)
 
-# Define UI for application that draws a histogram
+# Define UI
 ui <- fluidPage(
 )
 
-# Define server logic required to draw a histogram
+# Define server logic
 server <- function(input, output) {
 }
 
