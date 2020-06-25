@@ -28,3 +28,9 @@ writeOGR(ssf2.5, dsn = "shapefiles/sa20025/", layer = "SA2", driver="ESRI Shapef
 ssf3b <- ms_simplify(sf, 0.002, keep_shapes=FALSE)
 plot(ssf3b, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
 nrow(ssf3b@data)
+
+head(ssf2.5@data)
+laper <- (sf@data$LAND_AREA_ / sf@data$AREA_SQ_KM)
+sf@data$SA22018__1[laper > 0.1 & laper < 0.4]
+plot(ssf2.5[laper > 0.1,])
+writeOGR(ssf2.5[laper > 0.1,], dsn = "shapefiles/sa20025fil/", layer = "SA2", driver="ESRI Shapefile")
