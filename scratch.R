@@ -96,10 +96,17 @@ tencols[which.max(work_from[1, 5:14])]
 
 
 work_from$MAX <- work_from %>% select(home:other) %>% as.matrix() %>% 
-  apply(1, which.max)
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
 work_to$MAX <- work_to %>% select(home:other) %>% as.matrix() %>% 
-  apply(1, which.max)
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
 work_simp$MAX <- work_simp %>% select(home:other) %>% as.matrix() %>% 
-  apply(1, which.max)
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
 
-save(work_simp, work_to, work_from, tencols, file="datasets.RData")
+save(work_simp, work_to, work_from, tencols, file="viz/datasets.RData")
+
