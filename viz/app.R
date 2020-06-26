@@ -3,6 +3,7 @@ library(shinyjs)
 library(leaflet)
 library(rgdal)
 library(dplyr)
+library(leaflet.extras)
 
 # work_travel <- read_csv("../travel-work.csv")
 load(file="datasets.RData")
@@ -12,6 +13,7 @@ sa.in.home <- shpf@data$SA22018_V1 %in% work_from$res_code
 transport.t <- c("Work at home", "Private car", "Company car", 
                 "Carpool", "Bus", "Train", "Bicycle", "Walk",
                 "Ferry", "Other", "None")
+cols.labs <- c(transport.t[1:10], "Total")
 
 codelist <- shpf@data %>% 
   mutate(sa2_code = as.numeric(as.character(SA22018_V1))) %>% 
@@ -46,15 +48,34 @@ ui <- fluidPage(
     border: 2px solid #000000;
     font-size: 1.5em;
     font-weight: bold;
+  }
+  #mapcontrol {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+  }
+  #lochtml ul {
+    padding-left: 15px;
   }"),
   leafletOutput("map"),
+  absolutePanel(top = 10, right = 10, id="mapcontrol",
+                radioButtons("radioinout", label=NULL,
+                             choices = c(
+                               "Work in" = "work",
+                               "Live in" = "res"
+                               ),
+                             inline = TRUE),
+                div(id="locinfo",
+                    htmlOutput("lochtml"))),
   absolutePanel(bottom = 30, left = 30, id="loading",
                 p("Loading..."))
 )
 
 # Define server logic
 server <- function(input, output) {
-  sel.SA2.code <- 0
+  sel.SA2.code <- reactiveVal(0)
   p.layers <- c("polya", "polyb")
   output$map <- renderLeaflet({
     leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
@@ -63,6 +84,7 @@ server <- function(input, output) {
                   label = shpf@data$SA22018__1,
                   fillOpacity = 1) %>%
       setView(174, -41, 5) %>%
+      addResetMapButton() %>%
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
                 labels = transport.t, opacity = 1)
@@ -70,40 +92,16 @@ server <- function(input, output) {
                          anim=TRUE, animType = "slide", time=7)
     leaf
   })
-  observeEvent(input$map_shape_click, {
+  updateMap <- function() {
     shinyjs::showElement(selector="#loading p", asis = TRUE, 
                          anim=TRUE, animType = "slide")
-    p <- input$map_shape_click
-    print(p)
-    pdat <- data.frame(Longitude = p$lng,
-                      Latitude =p$lat)
-    # Assignment modified according
-    coordinates(pdat) <- ~ Longitude + Latitude
-    # Set the projection of the SpatialPointsDataFrame using the projection of the shapefile
-    proj4string(pdat) <- proj4string(shpf)
-    ppoly <- over(pdat, shpf)
-    codetmp <- as.numeric(as.character(ppoly[1,"SA22018_V1"]))
-    print(sel.SA2.code)
-    sel.SA2.code <<- ifelse(sel.SA2.code == codetmp, 0, codetmp)
-    print(ppoly)
-    #print(work_simp[work_simp$res_code == 
-    #                    sel.SA2.code,])
-    print(sel.SA2.code)
-    print(codetmp)
     fcols <- startcols
-    if (sel.SA2.code != 0) {
-      print(head(work_simp))
-      codvs <- work_simp %>% filter(work_code == sel.SA2.code)
-      print(head(codvs))
+    if (sel.SA2.code() != 0) {
+      codvs <- work_simp %>% filter(work_code == sel.SA2.code())
       codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
-      print(head(codvs))
-      print(table(codvs$MAX))
       codvs <- tencols[codvs$MAX]
-      print(table(codvs))
       fcols <- ifelse(is.na(codvs), "#808080", codvs)
-      print(table(fcols))
     }
-    print(table(fcols))
     leafletProxy("map", data = shpf) %>%
       addPolygons(group = p.layers[2] ,color="#000", opacity = 1, weight=1,
                                 fillColor = fcols,
@@ -113,6 +111,44 @@ server <- function(input, output) {
     p.layers <<- rev(p.layers)
     shinyjs::hideElement(selector="#loading p", asis=TRUE, 
                          anim=TRUE, animType = "slide", time = 7)
+  }
+  observeEvent(input$map_shape_click, {
+    p <- input$map_shape_click
+    pdat <- data.frame(Longitude = p$lng,
+                      Latitude =p$lat)
+    coordinates(pdat) <- ~ Longitude + Latitude
+    proj4string(pdat) <- proj4string(shpf)
+    ppoly <- over(pdat, shpf)
+    codetmp <- as.numeric(as.character(ppoly[1,"SA22018_V1"]))
+    sel.SA2.code(ifelse(sel.SA2.code() == codetmp, 0, codetmp))
+    updateMap()
+  })
+  output$lochtml <- renderUI({
+    seled <- sel.SA2.code()
+    if (seled == 0) {
+      HTML("")
+    } else {
+      str <- sprintf("<hr style='border-top: 1px solid #000;'/><h4>%s</h4>", 
+                     shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled])
+      if (input$radioinout == "work") {
+        vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
+        vals <- ifelse(is.na(vals), 0, vals)
+        vals <- ifelse(vals < 0, "~0", as.character(vals))
+        listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
+                vals),
+                collapse="")
+        str <- paste0(str, "<ul>", listi, "</ul>")
+      } else {
+        vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
+        vals <- ifelse(is.na(vals), 0, vals)
+        vals <- ifelse(vals < 0, "~0", as.character(vals))
+        listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
+                vals),
+                collapse="")
+        str <- paste0(str, "<ul>", listi, "</ul>")
+      }
+      HTML(str)
+    }
   })
 }
 
