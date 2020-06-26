@@ -92,3 +92,14 @@ work_simp %>%
 
 tencols <-  c("#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", 
               "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a")
+tencols[which.max(work_from[1, 5:14])]
+
+
+work_from$MAX <- work_from %>% select(home:other) %>% as.matrix() %>% 
+  apply(1, which.max)
+work_to$MAX <- work_to %>% select(home:other) %>% as.matrix() %>% 
+  apply(1, which.max)
+work_simp$MAX <- work_simp %>% select(home:other) %>% as.matrix() %>% 
+  apply(1, which.max)
+
+save(work_simp, work_to, work_from, tencols, file="datasets.RData")
