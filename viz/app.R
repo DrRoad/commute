@@ -109,15 +109,23 @@ server <- function(input, output) {
       codvs <- tencols[codvs$MAX]
       fcols <- ifelse(is.na(codvs), "#808080", codvs)
     }
-    leafletProxy("map", data = shpf) %>%
+    lp <- leafletProxy("map", data = shpf) %>%
       setShapeStyle(layerId = ~SA22018_V1, fillColor = fcols) %>%
       clearControls() %>%
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
-                labels = transport.t, opacity = 1)
-    p.layers <<- rev(p.layers)
+                labels = transport.t, opacity = 1) %>%
+      clearGroup("hpoly")
+    if (selcode %in% shpf@data$SA22018_V1) {
+      lp %>% addPolygons(group = "hpoly",
+                          weight = 4,
+                          data = shpf[which(shpf@data$SA22018_V1 == selcode),],
+                          color = "#000000",
+                         fill = FALSE, opacity = 1)
+    }
     shinyjs::hideElement(selector="#loading p", asis=TRUE, 
-                         anim=TRUE, animType = "slide")
+                         anim=TRUE, animType = "slide",
+                         time = 1)
   }
   observeEvent(input$map_shape_click, {
     p <- input$map_shape_click
@@ -137,24 +145,27 @@ server <- function(input, output) {
     if (seled == 0) {
       HTML("")
     } else {
-      str <- sprintf("<hr style='border-top: 1px solid #000;'/><h4>%s</h4>", 
+      hrstr <- "<hr style='border-top: 1px solid #000;'/>"
+      str <- sprintf("<p><b>%s</b></p>", 
                      shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled])
       if (input$radioinout == "work") {
+        str <- paste0("<p>People who work in</p>", str)
         vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
         vals <- ifelse(is.na(vals), 0, vals)
         vals <- ifelse(vals < 0, "~0", as.character(vals))
         listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
                 vals),
                 collapse="")
-        str <- paste0(str, "<ul>", listi, "</ul>")
+        str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
       } else {
+        str <- paste0("<p>People who live in</p>", str)
         vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
         vals <- ifelse(is.na(vals), 0, vals)
         vals <- ifelse(vals < 0, "~0", as.character(vals))
         listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
                 vals),
                 collapse="")
-        str <- paste0(str, "<ul>", listi, "</ul>")
+        str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
       }
       HTML(str)
     }
