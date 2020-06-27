@@ -64,20 +64,31 @@ ui <- fluidPage(
   }
   #lochtml ul {
     padding-left: 15px;
+  }
+  .radio label span p {
+    margin-top: 3px;
+    margin-bottom: 0px;
   }"),
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
                 radioButtons("radioinout", label="Show commuters who",
-                             choices = c(
-                               "Live in area" = "res",
-                               "Work in area" = "work"
+                             choiceNames = list(
+                               HTML("<p>Commute <b>from</b> selected area</p>"),
+                               HTML("<p>Commute <b>to</b> selected area</p>")),
+                             choiceValues = list(
+                               "res",
+                               "work"
                                ),
                              inline = FALSE),
                 radioButtons("radiocolour",
                              label = "Colour by",
-                             choices = c(
-                               "Transport type" = "type",
-                               "Number of commuters" = "number"
+                             choiceNames = list(
+                               HTML("<p>Most common commute method</p>"),
+                               HTML("<p>Number of commuters</p>")
+                             ),
+                             choiceValues = list(
+                               "type",
+                               "number"
                              ),
                              inline = FALSE),
                 div(id="locinfo",
@@ -101,7 +112,8 @@ server <- function(input, output) {
       addResetMapButton() %>%
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
-                labels = transport.t, opacity = 1)
+                labels = transport.t, opacity = 1,
+                title = "Commute method")
     shinyjs::hideElement(selector="#loading p", asis = TRUE, 
                          anim=TRUE, animType = "slide", time=7)
     leaf
@@ -111,33 +123,71 @@ server <- function(input, output) {
                          anim=TRUE, animType = "slide")
     selcode <- sel.SA2.code()
     selcode <- ifelse(is.na(selcode), 0, selcode)
-    
-    if (input$radioinout == "work") {
-      fcols <- startcols.work
-      if (selcode != 0) {
-        codvs <- work_simp %>% filter(work_code == selcode)
-        codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
-        codvs <- tencols[codvs$MAX]
-        fcols <- ifelse(is.na(codvs), "#808080", codvs)
+    psel <- selcode %in% shpf@data$SA22018_V1
+    if (input$radiocolour == "type") {
+      if (input$radioinout == "work") {
+        fcols <- startcols.work
+        if (psel) {
+          codvs <- work_simp %>% filter(work_code == selcode)
+          codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
+          codvs <- tencols[codvs$MAX]
+          fcols <- ifelse(is.na(codvs), "#808080", codvs)
+        }
+      } else {
+      fcols <- startcols.res
+        if (psel) {
+          codvs <- work_simp %>% filter(res_code == selcode)
+          codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "work_code"))
+          codvs <- tencols[codvs$MAX]
+          fcols <- ifelse(is.na(codvs), "#808080", codvs)
+        }
+        
       }
+      lp <- leafletProxy("map", data = shpf) %>%
+        setShapeStyle(layerId = ~SA22018_V1, fillColor = fcols) %>%
+        clearControls() %>%
+        addLegend(position = "topleft",
+                  colors = c(tencols, "#808080"),
+                  labels = transport.t, opacity = 1,
+                  title = "Commute method"
+                  ) %>%
+        clearGroup("hpoly")
     } else {
-    fcols <- startcols.res
-      if (selcode != 0) {
-        codvs <- work_simp %>% filter(res_code == selcode)
-        codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "work_code"))
-        codvs <- tencols[codvs$MAX]
-        fcols <- ifelse(is.na(codvs), "#808080", codvs)
+      if (input$radioinout == "work") {
+        if (psel) {
+          codvs <- work_simp %>% filter(work_code == selcode)
+          codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
+          cvals <- ifelse(codvs$total == 0, NA, codvs$total)
+          
+        } else {
+          codvs <- codelist %>% 
+            left_join(work_to, by = c("sa2_code" = "work_code"))
+          cvals <- ifelse(codvs$total == 0, NA, codvs$total)
+        }
+      } else {
+        if (psel) {
+          codvs <- work_simp %>% filter(res_code == selcode)
+          codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "work_code"))
+          cvals <- ifelse(codvs$total == 0, NA, codvs$total)
+        } else {
+          codvs <- codelist %>% 
+            left_join(work_from, by = c("sa2_code" = "res_code"))
+          cvals <- ifelse(codvs$total == 0, NA, codvs$total)
+        }
       }
-      
+      cvr <- range(cvals, na.rm = TRUE)
+      binner <- colorBin(c("white", "red"), cvr, bins = 7, pretty = TRUE)
+      lp <- leafletProxy("map", data = shpf) %>%
+        setShapeStyle(layerId = ~SA22018_V1, fillColor = binner(cvals)) %>%
+        clearControls() %>%
+        addLegend(position = "topleft",
+                  pal = binner,
+                  values = cvals, opacity = 1,
+                  na.label = "None",
+                  title = "Number of commuters") %>%
+        clearGroup("hpoly")
     }
-    lp <- leafletProxy("map", data = shpf) %>%
-      setShapeStyle(layerId = ~SA22018_V1, fillColor = fcols) %>%
-      clearControls() %>%
-      addLegend(position = "topleft",
-                colors = c(tencols, "#808080"),
-                labels = transport.t, opacity = 1) %>%
-      clearGroup("hpoly")
-    if (selcode %in% shpf@data$SA22018_V1) {
+    if (psel) {
       lp %>% addPolygons(group = "hpoly",
                           weight = 4,
                           data = shpf[which(shpf@data$SA22018_V1 == selcode),],
@@ -163,37 +213,75 @@ server <- function(input, output) {
   observeEvent(input$radioinout, ignoreInit = TRUE, {
     updateMap()
   })
+  observeEvent(input$radiocolour, ignoreInit = TRUE, {
+    updateMap()
+  })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
     seled <- ifelse(is.na(seled), 0, seled)
-    if (seled == 0) {
+    if (!(seled %in% shpf@data$SA22018_V1)) {
       HTML("")
     } else {
+      namesel <- shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled]
       hrstr <- "<hr style='border-top: 1px solid #000;'/>"
-      str <- sprintf("<b>%s</b>", 
-                     shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled])
-      if (input$radioinout == "work") {
-        str <- sprintf("<p>Commuting method of people who <b>work</b> in</p>
-                       <p><b><u>%s</u></b></p>", str)
-        vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
-        vals <- ifelse(is.na(vals), 0, vals)
-        vals <- ifelse(vals < 0, "~0", as.character(vals))
-        listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
-                vals),
-                collapse="")
-        str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
+      if (input$radiocolour == "type") {
+        str <- sprintf("<b>%s</b>", namesel)
+        if (input$radioinout == "work") {
+          str <- sprintf("<p>Commuting method of people who <b>work</b> in</p>
+                         <p><b><u>%s</u></b></p>", str)
+          vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
+          vals <- ifelse(is.na(vals), 0, vals)
+          vals <- ifelse(vals < 0, "~0", as.character(vals))
+          listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
+                  vals),
+                  collapse="")
+          str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
+        } else {
+          str <- sprintf("<p>Commuting method of people who <b>live</b> in</p>
+                         <p><u>%s</u></p>", str)
+          vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
+          vals <- ifelse(is.na(vals), 0, vals)
+          vals <- ifelse(vals < 0, "~0", as.character(vals))
+          listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
+                  vals),
+                  collapse="")
+          str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
+        }
+        HTML(str)
       } else {
-        str <- sprintf("<p>Commuting method of people who <b>live</b> in</p>
-                       <p><b><u>%s</u></b></p>", str)
-        vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
-        vals <- ifelse(is.na(vals), 0, vals)
-        vals <- ifelse(vals < 0, "~0", as.character(vals))
-        listi <- paste0(sprintf("<li>%s: %s</li>", cols.labs, 
-                vals),
-                collapse="")
-        str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
+        str <- hrstr
+        if (input$radioinout == "work") {
+          val <- as.numeric(work_to[work_to$work_code == seled, 15])
+          val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
+          str <- sprintf("%s<p>%d people commute <b>to</b></p>
+                          <p><b><u>%s</u></b></p>", str, val, namesel)
+          if (val > 0) {
+            subs <- work_simp %>% filter(work_code == seled) %>%
+              arrange(desc(total)) %>% head(10)
+            listi <- paste0(sprintf("<li>%s: %s</li>", subs$res_name, 
+                  subs$total),
+                  collapse="")
+            str <- sprintf("%s<p>Top areas to commute from<p>
+                           <ul>%s</ul>", str, listi)
+          }
+        } else {
+          val <- as.numeric(work_from[work_from$res_code == seled, 15])
+          val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
+          str <- sprintf("%s<p>%d people commute <b>from</b></p>
+                          <p><b><u>%s</u></b></p>", str, val, namesel)
+          if (val > 0) {
+            subs <- work_simp %>% filter(res_code == seled) %>%
+              arrange(desc(total)) %>% head(10)
+            listi <- paste0(sprintf("<li>%s: %s</li>", subs$work_name, 
+                  subs$total),
+                  collapse="")
+            str <- sprintf("%s<p>Top areas to commute to<p>
+                           <ul>%s</ul>", str, listi)
+          }
+          
+        }
+        HTML(str)
       }
-      HTML(str)
     }
   })
 }
