@@ -9,7 +9,7 @@ source("leafletfunctions.R")
 
 # work_travel <- read_csv("../travel-work.csv")
 load(file="datasets.RData")
-shpf <- readOGR(dsn="../shapefiles/sa20025WGSfilcth")
+shpf <- readOGR(dsn="sa20025WGSfilcth")
 sa.in.dest <- shpf@data$SA22018_V1 %in% work_to$work_code
 sa.in.home <- shpf@data$SA22018_V1 %in% work_from$res_code
 transport.t <- c("Work at home", "Private car", "Company car", 
@@ -28,6 +28,7 @@ startcols.work <- codelist %>% left_join(work_to, by = c("sa2_code" = "work_code
 startcols.work <- tencols[startcols.work$MAX]
 startcols.work <- ifelse(is.na(startcols.work), "#808080", startcols.work)
 
+hrstr <- "<hr style='border-top: 1px solid #000;'/>"
 
 # Define UI
 ui <- fluidPage(
@@ -68,6 +69,9 @@ ui <- fluidPage(
   .radio label span p {
     margin-top: 3px;
     margin-bottom: 0px;
+  }
+  .leaflet-container {
+    background-color: #84e1e1;
   }"),
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
@@ -93,14 +97,13 @@ ui <- fluidPage(
                              inline = FALSE),
                 div(id="locinfo",
                     htmlOutput("lochtml"))),
-  absolutePanel(bottom = 30, left = 30, id="loading",
+  absolutePanel(bottom = 30, left = 10, id="loading",
                 p("Loading..."))
 )
 
 # Define server logic
 server <- function(input, output) {
   sel.SA2.code <- reactiveVal(0)
-  p.layers <- c("polya", "polyb")
   output$map <- renderLeaflet({
     leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
       addPolygons(color="#000", opacity = 1, weight=1,
@@ -115,7 +118,7 @@ server <- function(input, output) {
                 labels = transport.t, opacity = 1,
                 title = "Commute method")
     shinyjs::hideElement(selector="#loading p", asis = TRUE, 
-                         anim=TRUE, animType = "slide", time=7)
+                         anim=TRUE, animType = "slide", time=10)
     leaf
   })
   updateMap <- function() {
@@ -198,8 +201,8 @@ server <- function(input, output) {
                          anim=TRUE, animType = "slide",
                          time = 1)
   }
-  observeEvent(input$map_shape_click, ignoreInit = TRUE, {
-    p <- input$map_shape_click
+  observeEvent(input$map_click, ignoreInit = TRUE, {
+    p <- input$map_click
     pdat <- data.frame(Longitude = p$lng,
                       Latitude =p$lat)
     coordinates(pdat) <- ~ Longitude + Latitude
@@ -210,6 +213,22 @@ server <- function(input, output) {
     sel.SA2.code(ifelse(sel.SA2.code() == codetmp, 0, codetmp))
     updateMap()
   })
+  observeEvent(input$map_shape_mouseover, once=TRUE,{
+    shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
+                  html = '
+<a href="http://leafletjs.com" 
+title="A JS library for interactive maps">Leaflet</a> | <a 
+href="https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
+title="Source data">
+StatsNZ</a> | <a href="https://petras.space/page/cv/" title="Hire me!">
+Petra Lamborn</a> | Numbers subject to <a
+href="http://archive.stats.govt.nz/about_us/legisln-policies-protocols/
+confidentiality-of-info-supplied-to-snz/safeguarding-confidentiality.aspx"
+title="A method of preserving confidentiality and anonymity">
+random rounding</a>
+                  '
+                )
+               })
   observeEvent(input$radioinout, ignoreInit = TRUE, {
     updateMap()
   })
@@ -220,10 +239,10 @@ server <- function(input, output) {
     seled <- sel.SA2.code()
     seled <- ifelse(is.na(seled), 0, seled)
     if (!(seled %in% shpf@data$SA22018_V1)) {
-      HTML("")
+      HTML(paste0(hrstr, 
+                  "<p><em>No area selected</em></p>"))
     } else {
       namesel <- shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled]
-      hrstr <- "<hr style='border-top: 1px solid #000;'/>"
       if (input$radiocolour == "type") {
         str <- sprintf("<b>%s</b>", namesel)
         if (input$radioinout == "work") {
