@@ -21,9 +21,12 @@ codelist <- shpf@data %>%
   mutate(sa2_code = as.numeric(as.character(SA22018_V1))) %>% 
   select(sa2_code)
 
-startcols <- codelist %>% left_join(work_from, by = c("sa2_code" = "res_code"))
-startcols <- tencols[startcols$MAX]
-startcols <- ifelse(is.na(startcols), "#808080", startcols)
+startcols.res <- codelist %>% left_join(work_from, by = c("sa2_code" = "res_code"))
+startcols.res <- tencols[startcols.res$MAX]
+startcols.res <- ifelse(is.na(startcols.res), "#808080", startcols.res)
+startcols.work <- codelist %>% left_join(work_to, by = c("sa2_code" = "work_code"))
+startcols.work <- tencols[startcols.work$MAX]
+startcols.work <- ifelse(is.na(startcols.work), "#808080", startcols.work)
 
 
 # Define UI
@@ -64,12 +67,19 @@ ui <- fluidPage(
   }"),
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
-                radioButtons("radioinout", label=NULL,
+                radioButtons("radioinout", label="Show commuters who",
                              choices = c(
-                               "Work in" = "work",
-                               "Live in" = "res"
+                               "Live in area" = "res",
+                               "Work in area" = "work"
                                ),
-                             inline = TRUE),
+                             inline = FALSE),
+                radioButtons("radiocolour",
+                             label = "Colour by",
+                             choices = c(
+                               "Transport type" = "type",
+                               "Number of commuters" = "number"
+                             ),
+                             inline = FALSE),
                 div(id="locinfo",
                     htmlOutput("lochtml"))),
   absolutePanel(bottom = 30, left = 30, id="loading",
@@ -83,7 +93,7 @@ server <- function(input, output) {
   output$map <- renderLeaflet({
     leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
       addPolygons(color="#000", opacity = 1, weight=1,
-                                fillColor = startcols, 
+                                fillColor = startcols.res, 
                   layerId = ~SA22018_V1,
                   label = shpf@data$SA22018__1,
                   fillOpacity = 1) %>%
@@ -97,17 +107,28 @@ server <- function(input, output) {
     leaf
   })
   updateMap <- function() {
-    selcode <- sel.SA2.code()
-    selcode <- ifelse(is.na(selcode), 0, selcode)
     shinyjs::showElement(selector="#loading p", asis = TRUE, 
                          anim=TRUE, animType = "slide")
-    fcols <- startcols
+    selcode <- sel.SA2.code()
+    selcode <- ifelse(is.na(selcode), 0, selcode)
     
-    if (selcode != 0) {
-      codvs <- work_simp %>% filter(work_code == selcode)
-      codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
-      codvs <- tencols[codvs$MAX]
-      fcols <- ifelse(is.na(codvs), "#808080", codvs)
+    if (input$radioinout == "work") {
+      fcols <- startcols.work
+      if (selcode != 0) {
+        codvs <- work_simp %>% filter(work_code == selcode)
+        codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "res_code"))
+        codvs <- tencols[codvs$MAX]
+        fcols <- ifelse(is.na(codvs), "#808080", codvs)
+      }
+    } else {
+    fcols <- startcols.res
+      if (selcode != 0) {
+        codvs <- work_simp %>% filter(res_code == selcode)
+        codvs <- codelist %>% left_join(codvs, by=c("sa2_code" = "work_code"))
+        codvs <- tencols[codvs$MAX]
+        fcols <- ifelse(is.na(codvs), "#808080", codvs)
+      }
+      
     }
     lp <- leafletProxy("map", data = shpf) %>%
       setShapeStyle(layerId = ~SA22018_V1, fillColor = fcols) %>%
@@ -127,7 +148,7 @@ server <- function(input, output) {
                          anim=TRUE, animType = "slide",
                          time = 1)
   }
-  observeEvent(input$map_shape_click, {
+  observeEvent(input$map_shape_click, ignoreInit = TRUE, {
     p <- input$map_shape_click
     pdat <- data.frame(Longitude = p$lng,
                       Latitude =p$lat)
@@ -139,6 +160,9 @@ server <- function(input, output) {
     sel.SA2.code(ifelse(sel.SA2.code() == codetmp, 0, codetmp))
     updateMap()
   })
+  observeEvent(input$radioinout, ignoreInit = TRUE, {
+    updateMap()
+  })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
     seled <- ifelse(is.na(seled), 0, seled)
@@ -146,10 +170,11 @@ server <- function(input, output) {
       HTML("")
     } else {
       hrstr <- "<hr style='border-top: 1px solid #000;'/>"
-      str <- sprintf("<p><b>%s</b></p>", 
+      str <- sprintf("<b>%s</b>", 
                      shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled])
       if (input$radioinout == "work") {
-        str <- paste0("<p>People who work in</p>", str)
+        str <- sprintf("<p>Commuting method of people who <b>work</b> in</p>
+                       <p><b><u>%s</u></b></p>", str)
         vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
         vals <- ifelse(is.na(vals), 0, vals)
         vals <- ifelse(vals < 0, "~0", as.character(vals))
@@ -158,7 +183,8 @@ server <- function(input, output) {
                 collapse="")
         str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
       } else {
-        str <- paste0("<p>People who live in</p>", str)
+        str <- sprintf("<p>Commuting method of people who <b>live</b> in</p>
+                       <p><b><u>%s</u></b></p>", str)
         vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
         vals <- ifelse(is.na(vals), 0, vals)
         vals <- ifelse(vals < 0, "~0", as.character(vals))
