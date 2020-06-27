@@ -4,6 +4,7 @@ library(leaflet)
 library(rgdal)
 library(dplyr)
 library(leaflet.extras)
+library(shinyWidgets)
 
 source("leafletfunctions.R")
 
@@ -97,6 +98,9 @@ ui <- fluidPage(
                              inline = FALSE),
                 div(id="locinfo",
                     htmlOutput("lochtml"))),
+  absolutePanel(top = 25, right = 10, id="control2",
+                materialSwitch("controlswitch", value=TRUE, right=TRUE,
+                               inline=TRUE, status="info")),
   absolutePanel(bottom = 30, left = 10, id="loading",
                 p("Loading..."))
 )
@@ -234,6 +238,10 @@ random rounding</a>
   })
   observeEvent(input$radiocolour, ignoreInit = TRUE, {
     updateMap()
+  })
+  observeEvent(input$controlswitch, ignoreInit = TRUE, {
+    shinyjs::toggleElement("mapcontrol", anim=TRUE,
+                           time = 0.5)
   })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
