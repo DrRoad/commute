@@ -75,18 +75,21 @@ blockquote {
   margin: 0;
 }
 .scrollbuffer {
-  height: 20px;
+  height: 50px;
 }
 .overflowable:before {
   content:'';
   width:100%;
-  height:20px;    
+  height:50px;    
   position:absolute;
   left:0;
   bottom:0;
   right:0;
   background:linear-gradient(transparent 0px, 
     rgba(255, 255, 255, 0.9));
+}
+#infobuttoncontainer label {
+  font-weight: bold;
 }
 "
 
