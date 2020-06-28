@@ -57,12 +57,17 @@ ui <- fluidPage(
     font-size: 1.5em;
     font-weight: bold;
   }
-  #mapcontrol {
+  #mapcontrol, #infobuttoncontainer, #infopanel {
     background-color: rgba(255, 255, 255, 0.8);
     border-radius: 5px;
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
+  }
+  #infopanel {
+    display: none;
+    padding: 30px;
+    z-index: 1001;
   }
   #lochtml ul {
     padding-left: 15px;
@@ -73,6 +78,15 @@ ui <- fluidPage(
   }
   .leaflet-container {
     background-color: #84e1e1;
+  }
+  #infobuttoncontainer {
+    margin-bottom: 16px;
+    z-index: 1002;
+  }
+  #infobuttoncontainer .shiny-input-container,
+  #infobuttoncontainer div div {
+    margin-right: 0px !important;
+    margin-bottom: 0px !important;
   }"),
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
@@ -102,7 +116,18 @@ ui <- fluidPage(
                 materialSwitch("controlswitch", value=TRUE, right=TRUE,
                                inline=TRUE, status="info")),
   absolutePanel(bottom = 30, left = 10, id="loading",
-                p("Loading..."))
+                p("Loading...")),
+  absolutePanel(bottom=26, right=10, left=10, top=10, id="infopanel",
+                p("Test")),
+  absolutePanel(bottom=10, right=10, id="infobuttoncontainer",
+    prettyToggle("mapinfobutton", label_on = "Info",
+                 label_off = "Info", icon_on=icon("times"),
+                 icon_off = icon("info"),
+                 animation = "pulse",
+                 inline = TRUE,
+                 status_on = "danger",
+                 status_off = "info")
+  )
 )
 
 # Define server logic
@@ -115,8 +140,8 @@ server <- function(input, output) {
                   layerId = ~SA22018_V1,
                   label = shpf@data$SA22018__1,
                   fillOpacity = 1) %>%
-      setView(174, -41, 5) %>%
-      addResetMapButton() %>%
+      setView(174, -41, 6) %>%
+        addResetMapButton() %>%
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
                 labels = transport.t, opacity = 1,
@@ -236,12 +261,19 @@ random rounding</a>
   observeEvent(input$radioinout, ignoreInit = TRUE, {
     updateMap()
   })
+  observeEvent(input$infobutton, {
+    print(input$infobutton)
+  })
   observeEvent(input$radiocolour, ignoreInit = TRUE, {
     updateMap()
   })
   observeEvent(input$controlswitch, ignoreInit = TRUE, {
     shinyjs::toggleElement("mapcontrol", anim=TRUE,
                            time = 0.5)
+  })
+  observeEvent(input$mapinfobutton, ignoreInit = TRUE, {
+    shinyjs::toggleElement("infopanel", anim=TRUE,
+                           time = 1)
   })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
