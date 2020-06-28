@@ -82,6 +82,7 @@ ui <- fluidPage(
 # Define server logic
 server <- function(input, output) {
   sel.SA2.code <- reactiveVal(0)
+  attribupdate <- FALSE
   output$map <- renderLeaflet({
     leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
       addPolygons(color="#000", opacity = 1, weight=1,
@@ -191,22 +192,23 @@ server <- function(input, output) {
     sel.SA2.code(ifelse(sel.SA2.code() == codetmp, 0, codetmp))
     updateMap()
   })
+  observeEvent(input$map_zoom, once=TRUE, {
+    if (!attribupdate) {
+      print(attribupdate)
+      shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
+                    html = attribhtml)
+      attribupdate <<- TRUE
+    }
+  })
   observeEvent(input$map_shape_mouseover, once=TRUE,{
-    shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
-                  html = '
-<a href="http://leafletjs.com" 
-title="A JS library for interactive maps">Leaflet</a> | <a 
-href="https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
-title="Source data">
-StatsNZ</a> | <a href="https://petras.space/page/cv/" title="Hire me!">
-Petra Lamborn</a> | Numbers subject to <a
-href="http://archive.stats.govt.nz/about_us/legisln-policies-protocols/
-confidentiality-of-info-supplied-to-snz/safeguarding-confidentiality.aspx"
-title="A method of preserving confidentiality and anonymity">
-random rounding</a>
-                  '
-                )
-               })
+    # Backup
+    if (!attribupdate) {
+      print(attribupdate)
+      shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
+                    html = attribhtml)
+      attribupdate <<- TRUE
+    }
+  })
   observeEvent(input$radioinout, ignoreInit = TRUE, {
     updateMap()
   })
