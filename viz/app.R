@@ -39,6 +39,7 @@ ui <- fluidPage(
   tags$style(type = "text/css", extracss),
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
+                div(
                 radioButtons("radioinout", label="Show commuters who",
                              choiceNames = list(
                                HTML("<p>Commute <b>from</b> selected area</p>"),
@@ -60,14 +61,14 @@ ui <- fluidPage(
                              ),
                              inline = FALSE),
                 div(id="locinfo",
-                    htmlOutput("lochtml"))),
+                    htmlOutput("lochtml")))),
   absolutePanel(top = 25, right = 10, id="control2",
                 materialSwitch("controlswitch", value=TRUE, right=TRUE,
                                inline=TRUE, status="info")),
   absolutePanel(bottom = 30, left = 10, id="loading",
                 p("Loading...")),
   absolutePanel(bottom=26, right=10, left=10, top=10, id="infopanel",
-                p("Test")),
+                infotext),
   absolutePanel(bottom=10, right=10, id="infobuttoncontainer",
     prettyToggle("mapinfobutton", label_on = "Info",
                  label_off = "Info", icon_on=icon("times"),
@@ -181,6 +182,7 @@ server <- function(input, output) {
                          time = 1)
   }
   observeEvent(input$map_click, ignoreInit = TRUE, {
+    cursel <- sel.SA2.code()
     p <- input$map_click
     pdat <- data.frame(Longitude = p$lng,
                       Latitude =p$lat)
@@ -189,12 +191,14 @@ server <- function(input, output) {
     ppoly <- over(pdat, shpf)
     codetmp <- as.numeric(as.character(ppoly[1,"SA22018_V1"]))
     codetmp <- ifelse(is.na(codetmp), 0, codetmp)
-    sel.SA2.code(ifelse(sel.SA2.code() == codetmp, 0, codetmp))
-    updateMap()
+    newsl <- ifelse(sel.SA2.code() == codetmp, 0, codetmp)
+    if (newsl != cursel) {
+      sel.SA2.code(newsl)
+      updateMap()
+    }
   })
   observeEvent(input$map_zoom, once=TRUE, {
     if (!attribupdate) {
-      print(attribupdate)
       shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
                     html = attribhtml)
       attribupdate <<- TRUE
@@ -203,7 +207,6 @@ server <- function(input, output) {
   observeEvent(input$map_shape_mouseover, once=TRUE,{
     # Backup
     if (!attribupdate) {
-      print(attribupdate)
       shinyjs::html(selector=".leaflet-control-attribution.leaflet-control",
                     html = attribhtml)
       attribupdate <<- TRUE
@@ -224,7 +227,7 @@ server <- function(input, output) {
   })
   observeEvent(input$mapinfobutton, ignoreInit = TRUE, {
     shinyjs::toggleElement("infopanel", anim=TRUE,
-                           time = 1)
+                           time = 0.5)
   })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
