@@ -56,9 +56,9 @@ html, body {
 attribhtml <- '
 <a href="http://leafletjs.com" 
 title="A JS library for interactive maps">Leaflet</a> | <a 
-href="https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
+href="http://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
 title="Source data">
-StatsNZ</a> | <a href="https://petras.space/page/cv/" title="Hire me!">
+StatsNZ</a> | <a href="http://petras.space/page/cv/" title="Hire me!">
 Petra Lamborn</a> | Numbers subject to <a
 href="http://archive.stats.govt.nz/about_us/legisln-policies-protocols/
 confidentiality-of-info-supplied-to-snz/safeguarding-confidentiality.aspx"
