@@ -90,8 +90,8 @@ work_simp %>%
     total = sum(ifelse(total < 0, 0, total)), .groups="drop"
   ) -> work_to
 
-tencols <-  c("#6a3d9a", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", 
-              "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#a6cee3")
+tencols <-  c("#fb9a99", "#e31a1c", "#1f78b4", "#6a3d9a", "#b2df8a", 
+              "#33a02c", "#fdbf6f", "#ff7f00", "#cab2d6", "#a6cee3")
 tencols[which.max(work_from[1, 5:14])]
 
 
