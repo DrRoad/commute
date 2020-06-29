@@ -91,6 +91,9 @@ blockquote {
 #infobuttoncontainer label {
   font-weight: bold;
 }
+.locinfo {
+  max-width: 100%;
+}
 "
 
 attribhtml <- '

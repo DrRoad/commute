@@ -90,6 +90,58 @@ work_simp %>%
     total = sum(ifelse(total < 0, 0, total)), .groups="drop"
   ) -> work_to
 
+edu_simp <- education_travel %>% select(
+  res_code = SA2_code_usual_residence_address,
+  res_name = SA2_name_usual_residence_address,
+  res_east = SA2_usual_residence_easting,
+  res_north = SA2_usual_residence_northing,
+  edu_code = SA2_code_educational_address,
+  edu_name = SA2_name_educational_address,
+  edu_east = SA2_educational_easting,
+  edu_north = SA2_educational_northing,
+  drive = Drive_a_car_truck_or_van,
+  passenger = Passenger_in_a_car_truck_or_van,
+  walk = Walk_or_jog,
+  bicycle = Bicycle,
+  scholbus = School_bus,
+  pubbus = Public_bus,
+  train = Train,
+  ferry = Ferry,
+  home = Study_at_home,
+  other = Other,
+  total = Total
+)
+
+edu_simp %>% group_by(res_code, res_name, res_east, res_north) %>%
+  summarise(
+    drive = sum(ifelse(drive < 0, 0, drive)),
+    passenger = sum(ifelse(passenger < 0, 0, passenger)),
+    walk = sum(ifelse(walk < 0, 0, walk)),
+    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
+    scholbus = sum(ifelse(scholbus < 0, 0, scholbus)),
+    pubbus = sum(ifelse(pubbus < 0, 0, pubbus)),
+    train = sum(ifelse(train < 0, 0, train)),
+    ferry = sum(ifelse(ferry < 0, 0, ferry)),
+    home = sum(ifelse(home < 0, 0, home)),
+    other = sum(ifelse(other < 0, 0, other)),
+    total = sum(ifelse(total < 0, 0, total)), .groups="drop"
+  ) -> edu_from
+
+edu_simp %>% group_by(edu_code, edu_name, edu_east, edu_north) %>%
+  summarise(
+    drive = sum(ifelse(drive < 0, 0, drive)),
+    passenger = sum(ifelse(passenger < 0, 0, passenger)),
+    walk = sum(ifelse(walk < 0, 0, walk)),
+    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
+    scholbus = sum(ifelse(scholbus < 0, 0, scholbus)),
+    pubbus = sum(ifelse(pubbus < 0, 0, pubbus)),
+    train = sum(ifelse(train < 0, 0, train)),
+    ferry = sum(ifelse(ferry < 0, 0, ferry)),
+    home = sum(ifelse(home < 0, 0, home)),
+    other = sum(ifelse(other < 0, 0, other)),
+    total = sum(ifelse(total < 0, 0, total)), .groups="drop"
+  ) -> edu_to
+
 tencols <-  c("#fb9a99", "#e31a1c", "#1f78b4", "#6a3d9a", "#b2df8a", 
               "#33a02c", "#fdbf6f", "#ff7f00", "#cab2d6", "#a6cee3")
 tencols[which.max(work_from[1, 5:14])]
@@ -108,5 +160,18 @@ work_simp$MAX <- work_simp %>% select(home:other) %>% as.matrix() %>%
     ifelse(max(x) <= 0, NA, which.max(x))
     })
 
-save(work_simp, work_to, work_from, tencols, file="viz/datasets.RData")
+edu_from$MAX <- edu_from %>% select(drive:other) %>% as.matrix() %>% 
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
+edu_to$MAX <- edu_to %>% select(drive:other) %>% as.matrix() %>% 
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
+edu_simp$MAX <- edu_simp %>% select(drive:other) %>% as.matrix() %>% 
+  apply(1, function(x) {
+    ifelse(max(x) <= 0, NA, which.max(x))
+    })
+
+save(work_simp, work_to, work_from, edu_simp, edu_to, edu_from, tencols, file="viz/datasets.RData")
 
