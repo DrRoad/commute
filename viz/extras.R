@@ -112,6 +112,9 @@ hr {
   margin-bottom: 10px;
   border-top: 1px solid #000;
 }
+.leaflet-control-search {
+  box-shadow: none;
+}
 "
 
 attribhtml <- '

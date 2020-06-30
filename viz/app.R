@@ -115,9 +115,16 @@ server <- function(input, output) {
                                 fillColor = startcols.res, 
                   layerId = ~SA22018_V1,
                   label = shpf@data$SA22018__1,
-                  fillOpacity = 1) %>%
+                  fillOpacity = 1, group = "polys") %>%
       setView(174, -41, 6) %>%
-        addResetMapButton() %>%
+      addResetMapButton() %>%
+      addSearchFeatures("polys", 
+                        options = searchFeaturesOptions(
+                          hideMarkerOnCollapse = TRUE,
+                          autoCollapse = FALSE,
+                          openPopup = FALSE,
+                          zoom=11,
+                          position="topleft")) %>%
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
                 labels = transport.t, opacity = 1,
@@ -477,7 +484,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              transport.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to employment from 
@@ -489,7 +496,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              transport.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to employment in 
@@ -504,7 +511,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              edu.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to education from 
@@ -516,7 +523,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              edu.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to education in 
@@ -536,7 +543,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              transport.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to employment 
@@ -549,7 +556,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              transport.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to employment 
@@ -564,7 +571,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              edu.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to education 
@@ -577,7 +584,7 @@ server <- function(input, output) {
             ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
             pmp <- ""
             if (ttype != 0) {
-              pmp <- sprintf("Primary mode of transport: %s", 
+              pmp <- sprintf("Most common mode of transport: %s", 
                              edu.t[ttype])
             }
             HTML(sprintf("%s<p><em>%d people commute to education 
