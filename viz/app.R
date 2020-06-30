@@ -16,10 +16,10 @@ sa.in.dest <- shpf@data$SA22018_V1 %in% work_to$work_code
 sa.in.home <- shpf@data$SA22018_V1 %in% work_from$res_code
 transport.t <- c("Work at home", "Private car", "Company car", 
                 "Carpool", "Bus", "Train", "Bicycle", "Walk",
-                "Ferry", "Other", "None")
+                "Ferry", "Other", "None/Unknown")
 edu.t <- c("Drive self", "Passenger in car", "Walk", "Bicycle",
            "School bus", "Public bus", "Train", "Ferry", "Study at home",
-           "Other", "None")
+           "Other", "None/Unknown")
 cols.labs <- c(transport.t[1:10], "Total")
 cols.edu.labs <- c(edu.t[1:10], "Total")
 
@@ -41,7 +41,7 @@ startcols.edu <- codelist %>% left_join(edu_to, by = c("sa2_code" = "edu_code"))
 startcols.edu <- tencols[startcols.edu$MAX]
 startcols.edu <- ifelse(is.na(startcols.edu), "#808080", startcols.edu)
 
-hrstr <- "<hr style='border-top: 1px solid #000;'/>"
+hrstr <- "<hr/>"
 
 # Define UI
 ui <- fluidPage(
@@ -75,8 +75,11 @@ ui <- fluidPage(
                                "number"
                              ),
                              inline = FALSE),
-                div(id="locinfo",
-                    htmlOutput("lochtml")))),
+                div(class="locinfo",
+                    htmlOutput("lochtml")),
+                div(id="loc2"),
+                    htmlOutput("secondarylochtml"))
+                ),
   absolutePanel(top = 25, right = 10, id="control2",
                 materialSwitch("controlswitch", value=TRUE, right=TRUE,
                                inline=TRUE, status="info")),
@@ -99,6 +102,13 @@ ui <- fluidPage(
 server <- function(input, output) {
   sel.SA2.code <- reactiveVal(0)
   attribupdate <- FALSE
+  mouseover <- reactive({
+    lastover <- input$map_shape_mouseover$id
+    lastover <- ifelse(is.null(lastover), 0, lastover)
+    lastout <- input$map_shape_mouseout$id
+    lastout <- ifelse(is.null(lastout), 0, lastout)
+    ifelse(lastout == lastover, 0, lastover)
+  })
   output$map <- renderLeaflet({
     leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
       addPolygons(color="#000", opacity = 1, weight=1,
@@ -319,18 +329,15 @@ server <- function(input, output) {
     seled <- sel.SA2.code()
     seled <- ifelse(is.na(seled), 0, seled)
     if (!(seled %in% shpf@data$SA22018_V1)) {
-      div(class="locinfo",
-        HTML(paste0(hrstr, 
-                  "<p><em>No area selected</em></p>"))
-      )
+      HTML("")
     } else {
       namesel <- shpf@data$SA22018__1[shpf@data$SA22018_V1 == seled]
       if (input$radioeduemp == "Employment") {
         if (input$radiocolour == "type") {
           str <- sprintf("<b>%s</b>", namesel)
           if (input$radioinout == "work") {
-            str <- sprintf("<p>Commuting method of people who <b>work</b> in</p>
-                           <p><b><u>%s</u></b></p>", str)
+            str <- sprintf("<p>Commuting method of people who <b>work</b> in 
+                           <u>%s</u></p>", str)
             vals <- as.numeric(work_to[work_to$work_code == seled, 5:15])
             vals <- ifelse(is.na(vals), 0, vals)
             vals <- ifelse(vals < 0, "~0", as.character(vals))
@@ -339,8 +346,8 @@ server <- function(input, output) {
                     collapse="")
             str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
           } else {
-            str <- sprintf("<p>Commuting method of people who <b>live</b> in</p>
-                           <p><u>%s</u></p>", str)
+            str <- sprintf("<p>Commuting method of people who <b>live</b> in 
+                           <u>%s</u></p>", str)
             vals <- as.numeric(work_from[work_from$res_code == seled, 5:15])
             vals <- ifelse(is.na(vals), 0, vals)
             vals <- ifelse(vals < 0, "~0", as.character(vals))
@@ -349,16 +356,14 @@ server <- function(input, output) {
                     collapse="")
             str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
           }
-          div(class="locinfo",
               HTML(str)
-          )
         } else {
           str <- hrstr
           if (input$radioinout == "work") {
             val <- as.numeric(work_to[work_to$work_code == seled, 15])
             val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
-            str <- sprintf("%s<p>%d people commute <b>to</b> employment in</p>
-                            <p><b><u>%s</u></b></p>", str, val, namesel)
+            str <- sprintf("%s<p>%d people commute <b>to</b> employment in 
+                            <b><u>%s</u></b></p>", str, val, namesel)
             if (val > 0) {
               subs <- work_simp %>% filter(work_code == seled) %>%
                 arrange(desc(total)) %>% head(10)
@@ -371,8 +376,8 @@ server <- function(input, output) {
           } else {
             val <- as.numeric(work_from[work_from$res_code == seled, 15])
             val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
-            str <- sprintf("%s<p>%d people commute to employment <b>from</b></p>
-                            <p><b><u>%s</u></b></p>", str, val, namesel)
+            str <- sprintf("%s<p>%d people commute to employment <b>from</b> 
+                            <b><u>%s</u></b></p>", str, val, namesel)
             if (val > 0) {
               subs <- work_simp %>% filter(res_code == seled) %>%
                 arrange(desc(total)) %>% head(10)
@@ -384,17 +389,15 @@ server <- function(input, output) {
             }
             
           }
-          div(class="locinfo",
               HTML(str)
-          )
         }
       } else {
         if (input$radiocolour == "type") {
           str <- sprintf("<b>%s</b>", namesel)
           if (input$radioinout == "work") {
-            str <- sprintf("<p>Commuting method of people who<br/>go to 
-                           <b>education</b> in</p>
-                           <p><b><u>%s</u></b></p>", str)
+            str <- sprintf("<p>Commuting method of people who commute to 
+                           <b>education</b> in 
+                           <u>%s</u></p>", str)
             vals <- as.numeric(edu_to[edu_to$edu_code == seled, 5:15])
             vals <- ifelse(is.na(vals), 0, vals)
             vals <- ifelse(vals < 0, "~0", as.character(vals))
@@ -403,9 +406,9 @@ server <- function(input, output) {
                     collapse="")
             str <- paste0(hrstr, str, "<ul>", listi, "</ul>")
           } else {
-            str <- sprintf("<p>Commuting method to education<br/>
-                           of people who <b>live</b> in</p>
-                           <p><u>%s</u></p>", str)
+            str <- sprintf("<p>Commuting method to education
+                           of people who <b>live</b> in 
+                           <u>%s</u></p>", str)
             vals <- as.numeric(edu_from[edu_from$res_code == seled, 5:15])
             vals <- ifelse(is.na(vals), 0, vals)
             vals <- ifelse(vals < 0, "~0", as.character(vals))
@@ -420,8 +423,8 @@ server <- function(input, output) {
           if (input$radioinout == "work") {
             val <- as.numeric(edu_to[edu_to$edu_code == seled, 15])
             val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
-            str <- sprintf("%s<p>%d people commute <b>to</b> education in</p>
-                            <p><b><u>%s</u></b></p>", str, val, namesel)
+            str <- sprintf("%s<p>%d people commute <b>to</b> education in 
+                            <b><u>%s</u></b></p>", str, val, namesel)
             if (val > 0) {
               subs <- edu_simp %>% filter(edu_code == seled) %>%
                 arrange(desc(total)) %>% head(10)
@@ -434,8 +437,8 @@ server <- function(input, output) {
           } else {
             val <- as.numeric(edu_from[edu_from$res_code == seled, 15])
             val <- ifelse(is.na(val), 0, ifelse(val < 0, 0, val))
-            str <- sprintf("%s<p>%d people commute to education <b>from</b></p>
-                            <p><b><u>%s</u></b></p>", str, val, namesel)
+            str <- sprintf("%s<p>%d people commute to education <b>from</b> 
+                            <b><u>%s</u></b></p>", str, val, namesel)
             if (val > 0) {
               subs <- edu_simp %>% filter(res_code == seled) %>%
                 arrange(desc(total)) %>% head(10)
@@ -448,9 +451,141 @@ server <- function(input, output) {
               
           }
         }
-        div(class="locinfo",
           HTML(str)
-        )
+      }
+    }
+  })
+  
+  output$secondarylochtml <- renderUI({
+    curshp <- mouseover()
+    cursel <- sel.SA2.code()
+    if (curshp == 0) {
+      if (cursel == 0) {
+        HTML(paste0(hrstr, 
+                  "<p><em>No area selected. Click on 
+                  an area for more information.</em></p>"))
+      } else {
+        HTML("")
+      }
+    } else {
+      shpname <- shpf@data$SA22018__1[curshp == shpf@data$SA22018_V1]
+      if (cursel == 0) {
+        if (input$radioeduemp == "Employment") {
+          if (input$radioinout == "res") {
+            fdf <- work_from %>% filter(res_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             transport.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to employment from 
+                         %s. %s</em></p>", hrstr, tot, shpname,
+                         pmp))
+          } else {
+            fdf <- work_to %>% filter(work_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             transport.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to employment in 
+                         %s. %s</em></p>", hrstr, tot, shpname,
+                         pmp))
+            
+          }
+        } else {
+          if (input$radioinout == "res") {
+            fdf <- edu_from %>% filter(res_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             edu.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to education from 
+                         %s. %s</em></p>", hrstr, tot, shpname,
+                         pmp))
+          } else {
+            fdf <- edu_to %>% filter(edu_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             edu.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to education in 
+                         %s. %s</em></p>", hrstr, tot, shpname,
+                         pmp))
+            
+          }
+          
+        }
+      } else {
+        shpname.0 <- shpf@data$SA22018__1[cursel == shpf@data$SA22018_V1]
+        if (input$radioeduemp == "Employment") {
+          if (input$radioinout == "res") {
+            fdf <- work_simp %>% filter(res_code == cursel,
+                                        work_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             transport.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to employment 
+                          in %s from %s. %s</em></p>", hrstr, tot, shpname,
+                         shpname.0, pmp))
+          } else {
+            fdf <- work_simp %>% filter(work_code == cursel,
+                                        res_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             transport.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to employment 
+                          in %s from %s. %s</em></p>", hrstr, tot, shpname.0,
+                         shpname, pmp))
+          }
+        } else {
+          if (input$radioinout == "res") {
+            fdf <- edu_simp %>% filter(res_code == cursel,
+                                        edu_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             edu.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to education 
+                          in %s from %s. %s</em></p>", hrstr, tot, shpname,
+                         shpname.0, pmp))
+          } else {
+            fdf <- edu_simp %>% filter(edu_code == cursel,
+                                        res_code == curshp)
+            tot <- ifelse(nrow(fdf) == 0, 0, fdf$total)
+            ttype <- ifelse(is.na(fdf$MAX) || nrow(fdf) == 0, 0, fdf$MAX)
+            pmp <- ""
+            if (ttype != 0) {
+              pmp <- sprintf("Primary mode of transport: %s", 
+                             edu.t[ttype])
+            }
+            HTML(sprintf("%s<p><em>%d people commute to education 
+                          in %s from %s. %s</em></p>", hrstr, tot, shpname.0,
+                         shpname, pmp))
+          }
+        }
+        
       }
     }
   })

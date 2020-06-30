@@ -30,6 +30,16 @@ html, body {
 #mapcontrol, #control2 {
   z-index: 1000;
 }
+#mapcontrol {
+  width: 22em;
+  max-height: 90%;
+  overflow: auto;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+#mapcontrol::-webkit-scrollbar {
+  display: none;
+}
 #infopanel {
   display: none;
   background-color: rgba(255, 255, 255, 0.9);
@@ -93,6 +103,14 @@ blockquote {
 }
 .locinfo {
   max-width: 100%;
+}
+.loading p {
+  margin: 0;
+}
+hr {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-top: 1px solid #000;
 }
 "
 
