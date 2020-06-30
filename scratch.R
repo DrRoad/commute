@@ -29,7 +29,7 @@ locgraph <- graph(edges = elist)
 sg <- decompose(locgraph, mode="weak")
 
 
-work_travel %>% rename(
+work_travel %>% select(
   res_code = SA2_code_usual_residence_address,
   res_name = SA2_name_usual_residence_address,
   res_east = SA2_usual_residence_easting,
@@ -38,15 +38,15 @@ work_travel %>% rename(
   work_name = SA2_name_workplace_address,
   work_east = SA2_workplace_easting,
   work_north = SA2_workplace_northing,
-  home = Work_at_home,
   private = Drive_a_private_car_truck_or_van,
-  company = Drive_a_company_car_truck_or_van,
   passenger = Passenger_in_a_car_truck_van_or_company_bus,
+  walk = Walk_or_jog,
+  bicycle = Bicycle,
+  company = Drive_a_company_car_truck_or_van,
   bus = Public_bus,
   train = Train,
-  bicycle = Bicycle,
-  walk = Walk_or_jog,
   ferry = Ferry,
+  home = Work_at_home,
   other = Other,
   total = Total
 ) -> work_simp
@@ -57,15 +57,15 @@ work_simp %>%
                          res_east,
                          res_north) %>%
   summarise(
-    home = sum(ifelse(home < 0, 0, home)),
     private = sum(ifelse(private < 0, 0, private)),
-    company = sum(ifelse(company < 0, 0, company)),
     passenger = sum(ifelse(passenger < 0, 0, passenger)),
+    walk = sum(ifelse(walk < 0, 0, walk)),
+    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
+    company = sum(ifelse(company < 0, 0, company)),
     bus = sum(ifelse(bus < 0, 0, bus)),
     train = sum(ifelse(train < 0, 0, train)),
-    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
-    walk = sum(ifelse(walk < 0, 0, walk)),
     ferry = sum(ifelse(ferry < 0, 0, ferry)),
+    home = sum(ifelse(home < 0, 0, home)),
     other = sum(ifelse(other < 0, 0, other)),
     total = sum(ifelse(total < 0, 0, total)), .groups="drop"
   ) -> work_from
@@ -77,15 +77,15 @@ work_simp %>%
                          work_east,
                          work_north) %>%
   summarise(
-    home = sum(ifelse(home < 0, 0, home)),
     private = sum(ifelse(private < 0, 0, private)),
-    company = sum(ifelse(company < 0, 0, company)),
     passenger = sum(ifelse(passenger < 0, 0, passenger)),
+    walk = sum(ifelse(walk < 0, 0, walk)),
+    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
+    company = sum(ifelse(company < 0, 0, company)),
     bus = sum(ifelse(bus < 0, 0, bus)),
     train = sum(ifelse(train < 0, 0, train)),
-    bicycle = sum(ifelse(bicycle < 0, 0, bicycle)),
-    walk = sum(ifelse(walk < 0, 0, walk)),
     ferry = sum(ifelse(ferry < 0, 0, ferry)),
+    home = sum(ifelse(home < 0, 0, home)),
     other = sum(ifelse(other < 0, 0, other)),
     total = sum(ifelse(total < 0, 0, total)), .groups="drop"
   ) -> work_to
@@ -142,20 +142,20 @@ edu_simp %>% group_by(edu_code, edu_name, edu_east, edu_north) %>%
     total = sum(ifelse(total < 0, 0, total)), .groups="drop"
   ) -> edu_to
 
-tencols <-  c("#fb9a99", "#e31a1c", "#1f78b4", "#6a3d9a", "#b2df8a", 
-              "#33a02c", "#fdbf6f", "#ff7f00", "#cab2d6", "#a6cee3")
+tencols <-  c("#f85654", "#e31a1c", "#1f78b4", "#6a3d9a", "#b2df8a", 
+              "#33a02c", "#fdbf6f", "#ff7f00", "#af8ac1", "#cab2d6")
 tencols[which.max(work_from[1, 5:14])]
 
 
-work_from$MAX <- work_from %>% select(home:other) %>% as.matrix() %>% 
+work_from$MAX <- work_from %>% select(private:other) %>% as.matrix() %>% 
   apply(1, function(x) {
     ifelse(max(x) <= 0, NA, which.max(x))
     })
-work_to$MAX <- work_to %>% select(home:other) %>% as.matrix() %>% 
+work_to$MAX <- work_to %>% select(private:other) %>% as.matrix() %>% 
   apply(1, function(x) {
     ifelse(max(x) <= 0, NA, which.max(x))
     })
-work_simp$MAX <- work_simp %>% select(home:other) %>% as.matrix() %>% 
+work_simp$MAX <- work_simp %>% select(private:other) %>% as.matrix() %>% 
   apply(1, function(x) {
     ifelse(max(x) <= 0, NA, which.max(x))
     })
