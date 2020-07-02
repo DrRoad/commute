@@ -15,7 +15,7 @@ shpf <- readOGR(dsn="sa20025WGSfil")
 sa.in.dest <- shpf@data$SA22018_V1 %in% work_to$work_code
 sa.in.home <- shpf@data$SA22018_V1 %in% work_from$res_code
 transport.t <- c("Private car", "Passenger in car",
-                 "Bicycle", "Walk", "Company car", "Bus", "Train",
+                 "Walk", "Bicycle", "Company car", "Bus", "Train",
                  "Ferry", "Work at home", "Other", "None/Unknown")
 edu.t <- c("Drive self", "Passenger in car", "Walk", "Bicycle",
            "School bus", "Public bus", "Train", "Ferry", "Study at home",
