@@ -11,7 +11,7 @@ source("extras.R")
 
 # work_travel <- read_csv("../travel-work.csv")
 load(file="datasets.RData")
-shpf <- readOGR(dsn="sa20025WGSfilcth")
+shpf <- readOGR(dsn="sa20025WGSfil")
 sa.in.dest <- shpf@data$SA22018_V1 %in% work_to$work_code
 sa.in.home <- shpf@data$SA22018_V1 %in% work_from$res_code
 transport.t <- c("Private car", "Passenger in car",
@@ -47,18 +47,26 @@ hrstr <- "<hr/>"
 ui <- fluidPage(
   useShinyjs(),
   leafletjs,
+  keyboardjs,
   tags$style(type = "text/css", extracss),
+  
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
                 div(
                 radioButtons("radioeduemp", 
                              label = "Commuters (age 15+) travelling to",
-                             choices = c("Employment", "Education"),
+                             choiceNames = list(
+                               HTML("<span>E<u>m</u>ployment</span>"),
+                               HTML("<span>E<u>d</u>ucation</span>")
+                             ),
+                             choiceValues = list(
+                               "Employment", "Education"
+                             ),
                              inline = TRUE),
                 radioButtons("radioinout", label="Show commuters who",
                              choiceNames = list(
-                               HTML("<p>Commute <b>from</b> selected area</p>"),
-                               HTML("<p>Commute <b>to</b> selected area</p>")),
+                               HTML("<span>Commute <u>f</u>rom selected area</span>"),
+                               HTML("<span>Commute <u>t</u>o selected area</span>")),
                              choiceValues = list(
                                "res",
                                "work"
@@ -67,8 +75,8 @@ ui <- fluidPage(
                 radioButtons("radiocolour",
                              label = "Colour by",
                              choiceNames = list(
-                               HTML("<p>Most common commute method</p>"),
-                               HTML("<p>Number of commuters</p>")
+                               HTML("<span>M<u>o</u>st common commute method</span>"),
+                               HTML("<span>N<u>u</u>mber of commuters</span>")
                              ),
                              choiceValues = list(
                                "type",
@@ -110,7 +118,8 @@ server <- function(input, output) {
     ifelse(lastout == lastover, 0, lastover)
   })
   output$map <- renderLeaflet({
-    leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13)) %>% 
+    leaf <- leaflet(shpf, options = leafletOptions(minZoom = 3, maxZoom = 13,
+                                                   crs = NULL)) %>% 
       addPolygons(color="#000", opacity = 1, weight=1,
                                 fillColor = startcols.res, 
                   layerId = ~SA22018_V1,

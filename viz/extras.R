@@ -158,7 +158,7 @@ again-data-visualisation-competition", "data visualisation competition",
     "coloured according to the people who commute to or from that area ",
     "(including the people who commute within the area). When no area is ",
     "selected, colouring is according to commutes to or from all ",
-    "localities. Hover over areas for a summary."),
+    "localities. Hover over areas for a summary (on a tablet, hold press)."),
   h4("FAQ"),
   shiny::tags$blockquote("Why are so many areas marked as 'works at ",
                          "home'?"),
@@ -187,3 +187,38 @@ again-data-visualisation-competition", "data visualisation competition",
     "common type can be determined."),
   div(class="scrollbuffer")
 )
+
+keyboardjs <- tags$head(tags$script(HTML("
+$(function(){ 
+  $(document).keyup(function(e) {
+    switch(e.key) {
+      case 'm':
+        document.getElementsByName('radioeduemp')[0].checked = true;
+        Shiny.onInputChange('radioeduemp', 'Employment')
+        break;
+      case 'd':
+        document.getElementsByName('radioeduemp')[1].checked = true;
+        Shiny.onInputChange('radioeduemp', 'Education')
+        break;
+      case 'f':
+        document.getElementsByName('radioinout')[0].checked = true;
+        Shiny.onInputChange('radioinout', 'res')
+        break;
+      case 't':
+        document.getElementsByName('radioinout')[1].checked = true;
+        Shiny.onInputChange('radioinout', 'work')
+        break;
+      case 'o':
+        document.getElementsByName('radiocolour')[0].checked = true;
+        Shiny.onInputChange('radiocolour', 'type')
+        break;
+      case 'u':
+        document.getElementsByName('radiocolour')[1].checked = true;
+        Shiny.onInputChange('radiocolour', 'number')
+        break;
+      default:
+        break;
+    }
+  });
+})
+")))
