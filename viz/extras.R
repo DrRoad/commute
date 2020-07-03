@@ -11,6 +11,7 @@ html, body {
 }
 #loading {
   cursor: progress !important;
+  z-index: 1002;
 }
 #loading p {
   border-radius: 5px;
@@ -41,7 +42,6 @@ html, body {
   display: none;
 }
 #infopanel {
-  display: none;
   background-color: rgba(255, 255, 255, 0.9);
   padding: 10px;
   z-index: 1001;
@@ -115,6 +115,22 @@ hr {
 .leaflet-control-search {
   box-shadow: none;
 }
+.shortcut {
+  text-decoration: underline 1px dotted;
+}
+#shortcutlist {
+  columns: 20em 2;
+}
+kbd {
+  color: #444;
+  background-color: #eee;
+  border-radius: 4px;
+  padding: 0px 2px;
+  border-color: #444;
+  border-width: 1px;
+  -webkit-box-shadow: 1px 1px #444;
+  box-shadow: 1px 1px #444;
+}
 "
 
 attribhtml <- '
@@ -130,7 +146,7 @@ title="A method of preserving confidentiality and anonymity">
 random rounding</a>
 '
 
-infotext <- div(class="overflowable",
+infotext <- div(class="overflowable", id="infoint", tabindex="2",
   h3("How did Kiwis commute in 2018?"),
   p("This tool maps the 2018 census",
   a(href=
@@ -159,6 +175,17 @@ again-data-visualisation-competition", "data visualisation competition",
     "(including the people who commute within the area). When no area is ",
     "selected, colouring is according to commutes to or from all ",
     "localities. Hover over areas for a summary (on a tablet, hold press)."),
+  h4("Keyboard shortcuts"),
+  shiny::tags$ul(id="shortcutlist",
+    shiny::tags$li(shiny::tags$kbd("I"), ": toggle this info page"),
+    shiny::tags$li(shiny::tags$kbd("M"), ": focus map"),
+    shiny::tags$li(shiny::tags$kbd("P"), ": show employment"),
+    shiny::tags$li(shiny::tags$kbd("D"), ": show education"),
+    shiny::tags$li(shiny::tags$kbd("F"), ": show people commuting from localities"),
+    shiny::tags$li(shiny::tags$kbd("T"), ": show people commuting to localities"),
+    shiny::tags$li(shiny::tags$kbd("O"), ": colour by most common commute type"),
+    shiny::tags$li(shiny::tags$kbd("U"), ": colour by number of commuters")
+  ),
   h4("FAQ"),
   shiny::tags$blockquote("Why are so many areas marked as 'works at ",
                          "home'?"),
@@ -191,30 +218,46 @@ again-data-visualisation-competition", "data visualisation competition",
 keyboardjs <- tags$head(tags$script(HTML("
 $(function(){ 
   $(document).keyup(function(e) {
+    var active = document.activeElement
+    if (active.id == 'searchtext9') return;
     switch(e.key) {
-      case 'm':
+      case 'p':
+      case 'P':
         document.getElementsByName('radioeduemp')[0].checked = true;
         Shiny.onInputChange('radioeduemp', 'Employment')
         break;
       case 'd':
+      case 'D':
         document.getElementsByName('radioeduemp')[1].checked = true;
         Shiny.onInputChange('radioeduemp', 'Education')
         break;
       case 'f':
+      case 'F':
         document.getElementsByName('radioinout')[0].checked = true;
         Shiny.onInputChange('radioinout', 'res')
         break;
       case 't':
+      case 'T':
         document.getElementsByName('radioinout')[1].checked = true;
         Shiny.onInputChange('radioinout', 'work')
         break;
       case 'o':
+      case 'O':
         document.getElementsByName('radiocolour')[0].checked = true;
         Shiny.onInputChange('radiocolour', 'type')
         break;
       case 'u':
+      case 'U':
         document.getElementsByName('radiocolour')[1].checked = true;
         Shiny.onInputChange('radiocolour', 'number')
+        break;
+      case 'i':
+      case 'I':
+        shinyjs.click('mapinfobutton')
+        break;
+      case 'm':
+      case 'M':
+        document.getElementById('map').focus()
         break;
       default:
         break;

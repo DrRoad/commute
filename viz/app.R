@@ -56,8 +56,8 @@ ui <- fluidPage(
                 radioButtons("radioeduemp", 
                              label = "Commuters (age 15+) travelling to",
                              choiceNames = list(
-                               HTML("<span>E<u>m</u>ployment</span>"),
-                               HTML("<span>E<u>d</u>ucation</span>")
+                               HTML("Em<span class='shortcut'>p</span>loyment"),
+                               HTML("E<span class='shortcut'>d</span>ucation")
                              ),
                              choiceValues = list(
                                "Employment", "Education"
@@ -65,8 +65,8 @@ ui <- fluidPage(
                              inline = TRUE),
                 radioButtons("radioinout", label="Show commuters who",
                              choiceNames = list(
-                               HTML("<span>Commute <u>f</u>rom selected area</span>"),
-                               HTML("<span>Commute <u>t</u>o selected area</span>")),
+                           HTML("Commute <span class='shortcut'>f</span>rom selected area"),
+                           HTML("Commute <span class='shortcut'>t</span>o selected area")),
                              choiceValues = list(
                                "res",
                                "work"
@@ -75,8 +75,8 @@ ui <- fluidPage(
                 radioButtons("radiocolour",
                              label = "Colour by",
                              choiceNames = list(
-                               HTML("<span>M<u>o</u>st common commute method</span>"),
-                               HTML("<span>N<u>u</u>mber of commuters</span>")
+                           HTML("M<span class='shortcut'>o</span>st common commute method"),
+                           HTML("N<span class='shortcut'>u</span>mber of commuters")
                              ),
                              choiceValues = list(
                                "type",
@@ -96,13 +96,16 @@ ui <- fluidPage(
   absolutePanel(bottom=26, right=10, left=10, top=10, id="infopanel",
                 infotext),
   absolutePanel(bottom=10, left=10, id="infobuttoncontainer",
-    prettyToggle("mapinfobutton", label_on = "Info",
-                 label_off = "Info", icon_on=icon("times"),
+    prettyToggle("mapinfobutton", 
+                 label_on = HTML("<span class='shortcut'>I</span>nfo"),
+                 label_off = HTML("<span class='shortcut'>I</span>nfo"),
+                 icon_on=icon("times"),
                  icon_off = icon("info"),
                  animation = "pulse",
                  inline = TRUE,
                  status_on = "danger",
-                 status_off = "info")
+                 status_off = "info",
+                 value = TRUE)
   )
 )
 
@@ -327,9 +330,6 @@ server <- function(input, output) {
   observeEvent(input$radioinout, ignoreInit = TRUE, {
     updateMap()
   })
-  observeEvent(input$infobutton, {
-    print(input$infobutton)
-  })
   observeEvent(input$radiocolour, ignoreInit = TRUE, {
     updateMap()
   })
@@ -338,8 +338,14 @@ server <- function(input, output) {
                            time = 0.5)
   })
   observeEvent(input$mapinfobutton, ignoreInit = TRUE, {
-    shinyjs::toggleElement("infopanel", anim=TRUE,
+    if (input$mapinfobutton) {
+      shinyjs::showElement("infopanel", anim=TRUE,
                            time = 0.5)
+    } else {
+      shinyjs::hideElement("infopanel", anim=TRUE,
+                           time = 0.5)
+      shinyjs::runjs("document.getElementById('map').focus()")
+    }
   })
   output$lochtml <- renderUI({
     seled <- sel.SA2.code()
