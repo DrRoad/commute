@@ -140,7 +140,7 @@ server <- function(input, output) {
       addLegend(position = "topleft",
                 colors = c(tencols, "#808080"),
                 labels = transport.t, opacity = 1,
-                title = "Commute method")
+                title = HTML("Most Common<br/>Commute Method"))
     shinyjs::hideElement(selector="#loading p", asis = TRUE, 
                          anim=TRUE, animType = "slide", time=10)
     leaf
@@ -177,7 +177,7 @@ server <- function(input, output) {
           addLegend(position = "topleft",
                     colors = c(tencols, "#808080"),
                     labels = transport.t, opacity = 1,
-                    title = "Commute method"
+                    title = HTML("Most Common<br/>Commute Method")
                     ) %>%
           clearGroup("hpoly")
       } else {
@@ -242,7 +242,7 @@ server <- function(input, output) {
           addLegend(position = "topleft",
                     colors = c(tencols, "#808080"),
                     labels = edu.t, opacity = 1,
-                    title = "Commute method"
+                    title = HTML("Most Common<br/>Commute Method")
                     ) %>%
           clearGroup("hpoly")
       } else {

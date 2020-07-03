@@ -20,6 +20,7 @@ html, body {
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
   font-size: 1.5em;
   font-weight: bold;
+  margin: 0;
 }
 #mapcontrol, #infobuttoncontainer, #infopanel {
   background-color: rgba(255, 255, 255, 0.8);
@@ -93,7 +94,7 @@ blockquote {
   height:50px;    
   position:absolute;
   left:0;
-  bottom:0;
+  bottom:5px;
   right:0;
   background:linear-gradient(transparent 0px, 
     rgba(255, 255, 255, 0.9));
