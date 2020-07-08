@@ -54,17 +54,18 @@ ui <- fluidPage(
   leafletOutput("map"),
   absolutePanel(top = 10, right = 10, id="mapcontrol",
                 div(
-                radioButtons("radioeduemp", 
+                radioGroupButtons("radioeduemp", 
                              label = "Commuters (age 15+) travelling to",
+                   status = "default",
                              choiceNames = list(
                                HTML("Em<span class='shortcut'>p</span>loyment"),
                                HTML("E<span class='shortcut'>d</span>ucation")
                              ),
                              choiceValues = list(
                                "Employment", "Education"
+                             )
                              ),
-                             inline = TRUE),
-                radioButtons("radioinout", label="Show commuters who",
+                radioGroupButtons("radioinout", label="Show commuters who",
                              choiceNames = list(
                    HTML("Commute <span class='shortcut'>f</span>rom selected area"),
                    HTML("Commute <span class='shortcut'>t</span>o selected area")),
@@ -72,8 +73,13 @@ ui <- fluidPage(
                                "res",
                                "work"
                                ),
-                             inline = FALSE),
-                radioButtons("radiocolour",
+                             direction="vertical",
+                   justified = TRUE,
+                   status = "default",
+                   checkIcon = list(yes = icon("check"), 
+                                    no = icon("check"))
+                   ),
+                radioGroupButtons("radiocolour",
                              label = "Colour by",
                              choiceNames = list(
                    HTML("M<span class='shortcut'>o</span>st common commute method"),
@@ -83,7 +89,11 @@ ui <- fluidPage(
                                "type",
                                "number"
                              ),
-                             inline = FALSE),
+                             direction = "vertical",
+                   checkIcon = list(yes = icon("check"), 
+                                    no = icon("check")),
+                   status = "default",
+                   justified = TRUE),
                 div(class="locinfo",
                     htmlOutput("lochtml")),
                 div(id="loc2"),

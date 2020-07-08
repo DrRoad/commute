@@ -50,10 +50,6 @@ html, body {
 #lochtml ul {
   padding-left: 15px;
 }
-.radio label span p {
-  margin-top: 3px;
-  margin-bottom: 0px;
-}
 .leaflet-container {
   background-color: #84e1e1;
 }
@@ -142,6 +138,12 @@ kbd:hover {
 #infoint li {
   padding-bottom: 10px;
 }
+.radio-btn-icon-no {
+    color: rgba(255, 255, 255, 0);
+}
+.btn.radiobtn {
+    text-align: left;
+}
 "
 
 attribhtml <- '
@@ -170,20 +172,22 @@ infotext <- div(class="overflowable", id="infoint", tabindex="2",
 "https://www.stats.govt.nz/2018-census/there-and-back-
 again-data-visualisation-competition", "data visualisation competition",
     .noWS = "after"), 
-    HTML(". The employment data counts employed persons 15 years or ",
-    "older who gave an employment location in the 2018 census, while the ",
-    "education data counts people in education 15 years or older who gave an ",
-    "education location in the 2018 census—including older highschoolers and ",
-    "university students, but not e.g. primary school students.")),
+    HTML(". The employment portion of the dataset captures employed persons ",
+    "15 years or older who gave an employment address or location ",
+    "in the 2018 census.",
+    "The education dataset counts people in education 15 years or older who ",
+    "gave an education location in the 2018 census, ",
+    "including older highschoolers and ",
+    "university students but not e.g. primary school students.")),
   h4("The data"),
   p("The 2018 New Zealand Census of Population and Dwellings",
     a(href=paste0("https://cdm20045.contentdm.oclc.org/digital/",
-      "collection/p20045coll2/id/713/rec/3"), "asked"), 
-    "individuals for primary locations of employment and education ",
-    "and their usual method of transportation. Stats NZ has released",
+      "collection/p20045coll2/id/713/rec/3"), "questionnaire"), 
+    "asked individuals for primary locations of employment and education ",
+    "and their usual method of transportation. Stats NZ has",
     a(href=
 "https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
-      "these data"),
+      "released data"),
     "aggregated at the level of", 
     a(href=paste0(
 "http://archive.stats.govt.nz/methods/classifications-and-standards/",
@@ -192,24 +196,26 @@ again-data-visualisation-competition", "data visualisation competition",
     "SA2 boundaries typically enclose areas with a population of a few ",
     "thousand, corresponding approximately to urban suburbs and rural towns. ",
     "The shapes of these areas have been heavily simplified in this map ",
-    "to reduce bandwidth and memory usage.",
+    "to reduce bandwidth and memory usage. ",
+    "The original boundaries can be viewed and downloaded",
     a(href=
 "https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
-    "The original boundaries can be viewed and downloaded from the Stats NZ ",
-    "datafinder website.")),
-  h4("Options"),
-  p("The top right panel (toggleable via the blue switch) allows ",
-    "you to choose between the employment and education datasets, ",
-    "visualising the people who commute from ",
-    "and to each area to both employment and education, and between ",
-    "showing numbers of people or ",
-    "their primary mode of transportation."),
+    "from the Stats NZ datafinder website", .noWS = "after"), "."),
+  h4("Using this tool"),
+  p("The options avaliable allow ",
+    "you to select the employment or education datasets. ",
+    "You may also choose to visualise the people who commute from ",
+    "or to each area, and select between showing numbers of people or ",
+    "their primary mode of transportation. \"Primary\" is calculated by ",
+    "FPP rules: it means the most common, not the majority."),
   p("Select an area by clicking on it; deselect by clicking it again ",
-    "or clicking in the water. When an area is selected the map is ",
+    "or clicking the sea. When an area is selected the map is ",
     "coloured according to the people who commute to or from that area ",
     "(including the people who commute within the area). When no area is ",
     "selected, colouring is according to commutes to or from all ",
     "localities. Hover over areas for a summary (on a tablet, hold press)."),
+  p("At rest the map is coloured by the most common type of transportation ",
+    "used by people commuting to employment from each area."),
   h4("Keyboard shortcuts"),
   shiny::tags$ul(id="shortcutlist",
     shiny::tags$li(shiny::tags$kbd("I"), ": toggle this info page"),
@@ -274,32 +280,32 @@ $(function(){
     switch(e.key) {
       case 'p':
       case 'P':
-        document.getElementsByName('radioeduemp')[0].checked = true;
+        document.getElementsByName('radioeduemp')[0].click();
         Shiny.onInputChange('radioeduemp', 'Employment')
         break;
       case 'd':
       case 'D':
-        document.getElementsByName('radioeduemp')[1].checked = true;
+        document.getElementsByName('radioeduemp')[1].click();
         Shiny.onInputChange('radioeduemp', 'Education')
         break;
       case 'f':
       case 'F':
-        document.getElementsByName('radioinout')[0].checked = true;
+        document.getElementsByName('radioinout')[0].click();
         Shiny.onInputChange('radioinout', 'res')
         break;
       case 't':
       case 'T':
-        document.getElementsByName('radioinout')[1].checked = true;
+        document.getElementsByName('radioinout')[1].click();
         Shiny.onInputChange('radioinout', 'work')
         break;
       case 'o':
       case 'O':
-        document.getElementsByName('radiocolour')[0].checked = true;
+        document.getElementsByName('radiocolour')[0].click();
         Shiny.onInputChange('radiocolour', 'type')
         break;
       case 'u':
       case 'U':
-        document.getElementsByName('radiocolour')[1].checked = true;
+        document.getElementsByName('radiocolour')[1].click();
         Shiny.onInputChange('radiocolour', 'number')
         break;
       case 'i':
