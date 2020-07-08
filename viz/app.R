@@ -48,6 +48,7 @@ ui <- fluidPage(
   useShinyjs(),
   leafletjs,
   keyboardjs,
+  shiny::tags$title("How did Kiwis commute in 2018?"),
   tags$style(type = "text/css", extracss),
   
   leafletOutput("map"),
@@ -65,8 +66,8 @@ ui <- fluidPage(
                              inline = TRUE),
                 radioButtons("radioinout", label="Show commuters who",
                              choiceNames = list(
-                           HTML("Commute <span class='shortcut'>f</span>rom selected area"),
-                           HTML("Commute <span class='shortcut'>t</span>o selected area")),
+                   HTML("Commute <span class='shortcut'>f</span>rom selected area"),
+                   HTML("Commute <span class='shortcut'>t</span>o selected area")),
                              choiceValues = list(
                                "res",
                                "work"
@@ -75,8 +76,8 @@ ui <- fluidPage(
                 radioButtons("radiocolour",
                              label = "Colour by",
                              choiceNames = list(
-                           HTML("M<span class='shortcut'>o</span>st common commute method"),
-                           HTML("N<span class='shortcut'>u</span>mber of commuters")
+                   HTML("M<span class='shortcut'>o</span>st common commute method"),
+                   HTML("N<span class='shortcut'>u</span>mber of commuters")
                              ),
                              choiceValues = list(
                                "type",

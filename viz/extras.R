@@ -96,8 +96,7 @@ blockquote {
   left:0;
   bottom:5px;
   right:0;
-  background:linear-gradient(transparent 0px, 
-    rgba(255, 255, 255, 0.9));
+  background:linear-gradient(rgba(255, 255, 255, 0) 0px, rgba(255, 255, 255, 0.9));
 }
 #infobuttoncontainer label {
   font-weight: bold;
@@ -123,14 +122,25 @@ hr {
   columns: 20em 2;
 }
 kbd {
-  color: #444;
+  color: black;
   background-color: #eee;
   border-radius: 4px;
-  padding: 0px 2px;
+  padding: 1px 6px;
   border-color: #444;
   border-width: 1px;
   -webkit-box-shadow: 1px 1px #444;
   box-shadow: 1px 1px #444;
+  font-size: 120%;
+  font-family: arial, Helvetica, sans-serif;
+  cursor: pointer;
+}
+kbd:hover {
+    background-color: #ddd;
+    box-shadow: 0.5px 0.5px;
+    -webkit-box-shadow: 0.5px 0.5px;
+}
+#infoint li {
+  padding-bottom: 10px;
 }
 "
 
@@ -159,14 +169,38 @@ infotext <- div(class="overflowable", id="infoint", tabindex="2",
     a(href=
 "https://www.stats.govt.nz/2018-census/there-and-back-
 again-data-visualisation-competition", "data visualisation competition",
-    .noWS = "after"), ". The employment data counts employed persons 15 years or ",
+    .noWS = "after"), 
+    HTML(". The employment data counts employed persons 15 years or ",
     "older who gave an employment location in the 2018 census, while the ",
     "education data counts people in education 15 years or older who gave an ",
     "education location in the 2018 census—including older highschoolers and ",
-    "university students, but not e.g. primary school students."),
+    "university students, but not e.g. primary school students.")),
+  h4("The data"),
+  p("The 2018 New Zealand Census of Population and Dwellings",
+    a(href=paste0("https://cdm20045.contentdm.oclc.org/digital/",
+      "collection/p20045coll2/id/713/rec/3"), "asked"), 
+    "individuals for primary locations of employment and education ",
+    "and their usual method of transportation. Stats NZ has released",
+    a(href=
+"https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
+      "these data"),
+    "aggregated at the level of", 
+    a(href=paste0(
+"http://archive.stats.govt.nz/methods/classifications-and-standards/",
+"classification-related-stats-standards/geographic-areas/pg4.aspx#gsc.tab=0"),
+   "Statistical Area 2", .noWS = "after"), ". ",
+    "SA2 boundaries typically enclose areas with a population of a few ",
+    "thousand, corresponding approximately to urban suburbs and rural towns. ",
+    "The shapes of these areas have been heavily simplified in this map ",
+    "to reduce bandwidth and memory usage.",
+    a(href=
+"https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
+    "The original boundaries can be viewed and downloaded from the Stats NZ ",
+    "datafinder website.")),
   h4("Options"),
   p("The top right panel (toggleable via the blue switch) allows ",
-    "you to choose between visualising the people who commute from ",
+    "you to choose between the employment and education datasets, ",
+    "visualising the people who commute from ",
     "and to each area to both employment and education, and between ",
     "showing numbers of people or ",
     "their primary mode of transportation."),
@@ -180,8 +214,18 @@ again-data-visualisation-competition", "data visualisation competition",
   shiny::tags$ul(id="shortcutlist",
     shiny::tags$li(shiny::tags$kbd("I"), ": toggle this info page"),
     shiny::tags$li(shiny::tags$kbd("M"), ": focus map"),
-    shiny::tags$li(shiny::tags$kbd("P"), ": show employment"),
-    shiny::tags$li(shiny::tags$kbd("D"), ": show education"),
+    shiny::tags$ul(
+      shiny::tags$li(shiny::tags$kbd("+"), shiny::tags$kbd("-"),
+                     ": zoom map"),
+      shiny::tags$li(shiny::tags$kbd(HTML("&larr;")),
+                     shiny::tags$kbd(HTML("&uarr;")),
+                     shiny::tags$kbd(HTML("&rarr;")),
+                     shiny::tags$kbd(HTML("&darr;")),
+                     ": move map")
+    ),
+    shiny::tags$li(shiny::tags$kbd("S"), ": search map"),
+    shiny::tags$li(shiny::tags$kbd("P"), ": show employment data"),
+    shiny::tags$li(shiny::tags$kbd("D"), ": show education data"),
     shiny::tags$li(shiny::tags$kbd("F"), ": show people commuting from localities"),
     shiny::tags$li(shiny::tags$kbd("T"), ": show people commuting to localities"),
     shiny::tags$li(shiny::tags$kbd("O"), ": colour by most common commute type"),
@@ -213,6 +257,12 @@ again-data-visualisation-competition", "data visualisation competition",
     "total number of people to be large enough to escape censoring while ",
     "all transport", em("type"), "numbers are too small and so no most ",
     "common type can be determined."),
+  shiny::tags$blockquote("Does anyone commute to (or from?) the Chatham Islands?"),
+  p("No, but some people commute within it. Of 249 people commuting to ",
+    "employment, 105 travel by private car, 24 by company car, 18 walk, 12 ",
+    "are passengers in cars driven by other people, and 93 work at home. ",
+    "Of 84 people commuting to education, 39 take a schoolbus, 9 walk, 9 are ",
+    "passengers in a car, and 15 are educated at home."),
   div(class="scrollbuffer")
 )
 
@@ -259,6 +309,12 @@ $(function(){
       case 'm':
       case 'M':
         document.getElementById('map').focus()
+        break;
+      case 's':
+      case 'S':
+        var evObj = document.createEvent('Events');
+        evObj.initEvent('click', true, false);
+        document.getElementsByClassName('search-button')[0].dispatchEvent(evObj);
         break;
       default:
         break;
