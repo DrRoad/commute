@@ -33,7 +33,7 @@ html, body {
   z-index: 1000;
 }
 #mapcontrol {
-  width: 22em;
+  width: 20em;
   max-height: 90%;
   overflow: auto;
   -ms-overflow-style: none;  /* IE and Edge */
@@ -145,7 +145,9 @@ kbd:hover {
 .btn.radiobtn {
     text-align: left;
 }
-#control2 .state label {
+#control2 .state label,
+#infobuttoncontainer .state label
+{
     width: 0px;
 }
 "

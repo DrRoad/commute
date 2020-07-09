@@ -99,7 +99,8 @@ ui <- fluidPage(
                 div(id="loc2"),
                     htmlOutput("secondarylochtml"))
                 ),
-  absolutePanel(top=10, right=4, id="infobuttoncontainer",
+  absolutePanel(top=10, right=9, id="infobuttoncontainer",
+                title="Toggle (I)nformation",
     prettyToggle("mapinfobutton", 
                  label_on = NULL,
                  label_off = NULL,
