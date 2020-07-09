@@ -99,14 +99,7 @@ ui <- fluidPage(
                 div(id="loc2"),
                     htmlOutput("secondarylochtml"))
                 ),
-  absolutePanel(top = 25, right = 10, id="control2",
-                materialSwitch("controlswitch", value=TRUE, right=TRUE,
-                               inline=TRUE, status="info")),
-  absolutePanel(bottom = 26, right = 10, id="loading",
-                p("Loading...")),
-  absolutePanel(bottom=26, right=10, left=10, top=10, id="infopanel",
-                infotext),
-  absolutePanel(bottom=10, left=10, id="infobuttoncontainer",
+  absolutePanel(top=10, right=10, id="infobuttoncontainer",
     prettyToggle("mapinfobutton", 
                  label_on = HTML("<span class='shortcut'>I</span>nfo"),
                  label_off = HTML("<span class='shortcut'>I</span>nfo"),
@@ -115,9 +108,18 @@ ui <- fluidPage(
                  animation = "pulse",
                  inline = TRUE,
                  status_on = "danger",
-                 status_off = "info",
+                 status_off = "primary",
                  value = TRUE)
-  )
+  ),
+  absolutePanel(top = 40, right = 7.5, id="control2", title="Toggle panel",
+                prettySwitch("controlswitch", value=TRUE, label = NULL,
+                             slim = FALSE,
+                               inline=TRUE, status="info",
+                             fill=FALSE, bigger=FALSE)),
+  absolutePanel(bottom = 26, right = 10, id="loading",
+                p("Loading...")),
+  absolutePanel(bottom=26, right=10, left=10, top=10, id="infopanel",
+                infotext)
 )
 
 # Define server logic

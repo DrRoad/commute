@@ -22,7 +22,7 @@ html, body {
   font-weight: bold;
   margin: 0;
 }
-#mapcontrol, #infobuttoncontainer, #infopanel {
+#mapcontrol, #infopanel {
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 5px;
   box-shadow: 0 0 15px rgba(0,0,0,0.2);
@@ -54,8 +54,9 @@ html, body {
   background-color: #84e1e1;
 }
 #infobuttoncontainer {
-  margin-bottom: 16px;
+  padding: 6px 8px;
   z-index: 1002;
+  font: 14px/16px Arial, Helvetica, sans-serif;
 }
 #infobuttoncontainer .shiny-input-container,
 #infobuttoncontainer div div {
@@ -143,6 +144,9 @@ kbd:hover {
 }
 .btn.radiobtn {
     text-align: left;
+}
+#control2 .state label {
+    width: 0px;
 }
 "
 
