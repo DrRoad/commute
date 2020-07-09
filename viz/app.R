@@ -99,10 +99,10 @@ ui <- fluidPage(
                 div(id="loc2"),
                     htmlOutput("secondarylochtml"))
                 ),
-  absolutePanel(top=10, right=10, id="infobuttoncontainer",
+  absolutePanel(top=10, right=4, id="infobuttoncontainer",
     prettyToggle("mapinfobutton", 
-                 label_on = HTML("<span class='shortcut'>I</span>nfo"),
-                 label_off = HTML("<span class='shortcut'>I</span>nfo"),
+                 label_on = NULL,
+                 label_off = NULL,
                  icon_on=icon("times"),
                  icon_off = icon("info"),
                  animation = "pulse",
@@ -111,7 +111,7 @@ ui <- fluidPage(
                  status_off = "primary",
                  value = TRUE)
   ),
-  absolutePanel(top = 40, right = 7.5, id="control2", title="Toggle panel",
+  absolutePanel(top = 40, right = 6, id="control2", title="Toggle panel",
                 prettySwitch("controlswitch", value=TRUE, label = NULL,
                              slim = FALSE,
                                inline=TRUE, status="info",
