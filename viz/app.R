@@ -44,7 +44,7 @@ startcols.edu <- ifelse(is.na(startcols.edu), "#808080", startcols.edu)
 hrstr <- "<hr/>"
 
 # Define UI
-ui <- fluidPage(
+ui <- fillPage(
   useShinyjs(),
   leafletjs,
   keyboardjs,

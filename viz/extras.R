@@ -1,8 +1,4 @@
 extracss <- "
-html, body {
-  width:100%;
-  height:100%
-}
 #map {
   height: 100% !important;
   position: absolute !important;
@@ -34,7 +30,7 @@ html, body {
 }
 #mapcontrol {
   width: 20em;
-  max-height: 90%;
+  max-height: 95%;
   overflow: auto;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
