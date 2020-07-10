@@ -157,12 +157,9 @@ attribhtml <- '
 title="A JS library for interactive maps">Leaflet</a> | <a 
 href="http://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
 title="Source data">
-StatsNZ</a> | <a href="http://petras.space/page/cv/" title="Hire me!">
-Petra Lamborn</a> | Numbers subject to <a
-href="http://archive.stats.govt.nz/about_us/legisln-policies-protocols/
-confidentiality-of-info-supplied-to-snz/safeguarding-confidentiality.aspx"
-title="A method of preserving confidentiality and anonymity">
-random rounding</a>
+StatsNZ</a> | <a href="http://petras.space/" title="Hire me!">
+Petra Lamborn</a> (<a href="https://git.petras.space/petra/commute"
+title="Source code">Source</a>)
 '
 
 infotext <- div(class="overflowable", id="infoint", tabindex="2",
@@ -172,7 +169,8 @@ infotext <- div(class="overflowable", id="infoint", tabindex="2",
     "https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/", 
     "commuter data"), 
   "to help visualise transport ",
-    "connections. It is ", a(href="http://petras.space", "Petra Lamborn's"),
+    "connections. It is ", a(href="http://petras.space/page/cv/", title="Hire me!",
+    "Petra Lamborn's"),
     " entry for the ", em("There and Back Again"),
     a(href=
 "https://www.stats.govt.nz/2018-census/there-and-back-
@@ -205,7 +203,7 @@ again-data-visualisation-competition", "data visualisation competition",
     "to reduce bandwidth and memory usage. ",
     "The original boundaries can be viewed and downloaded",
     a(href=
-"https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
+"https://datafinder.stats.govt.nz/layer/92212-statistical-area-2-2018-generalised/",
     "from the Stats NZ datafinder website", .noWS = "after"), "."),
   h4("Using this tool"),
   p("The options avaliable allow ",
