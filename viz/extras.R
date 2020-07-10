@@ -223,7 +223,7 @@ again-data-visualisation-competition", "data visualisation competition",
     "used by people commuting to employment from each area."),
   h4("Keyboard shortcuts"),
   shiny::tags$ul(id="shortcutlist",
-    shiny::tags$li(shiny::tags$kbd("I"), ": toggle this info page"),
+    shiny::tags$li(shiny::tags$kbd("I"), ": show/hide this info page"),
     shiny::tags$li(shiny::tags$kbd("M"), ": focus map"),
     shiny::tags$ul(
       shiny::tags$li(shiny::tags$kbd("+"), shiny::tags$kbd("-"),
@@ -235,6 +235,7 @@ again-data-visualisation-competition", "data visualisation competition",
                      ": move map")
     ),
     shiny::tags$li(shiny::tags$kbd("S"), ": search map"),
+    shiny::tags$li(shiny::tags$kbd("L"), ": show/hide options panel"),
     shiny::tags$li(shiny::tags$kbd("P"), ": show employment data"),
     shiny::tags$li(shiny::tags$kbd("D"), ": show education data"),
     shiny::tags$li(shiny::tags$kbd("F"), ": show people commuting from localities"),
@@ -326,6 +327,10 @@ $(function(){
         var evObj = document.createEvent('Events');
         evObj.initEvent('click', true, false);
         document.getElementsByClassName('search-button')[0].dispatchEvent(evObj);
+        break;
+      case 'l':
+      case 'L':
+        document.getElementById('controlswitch').click();
         break;
       default:
         break;
