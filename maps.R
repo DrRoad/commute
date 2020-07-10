@@ -1,5 +1,8 @@
+# Map simplification
+# In future, might be better to do this online at https://mapshaper.org/
+# Save installing v8!
 library(rgdal)
-library(rmapshaper)
+library(rmapshaper) 
 
 # sf <- readOGR(dsn = "shapefiles/statsnzstatistical-area-2-2018-generalised-SHP/")
 sf <- readOGR(dsn = "shapefiles/SA2-2018-WGS/")
@@ -12,6 +15,7 @@ ssf1 <- ms_simplify(sf, keep_shapes=TRUE)
 plot(ssf1, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
 nrow(ssf1@data)
 
+# Ended up going with this version
 ssf2.5 <- ms_simplify(sf, 0.025, keep_shapes=TRUE)
 plot(ssf2.5, xlim=c(1480000, 1510000), ylim=c(5150000, 5180000))
 nrow(ssf2.5@data)
@@ -34,5 +38,6 @@ ci <- sf@data$SA22018__1 != "Chatham Islands"
 head(ssf2.5@data)
 laper <- (sf@data$LAND_AREA_ / sf@data$AREA_SQ_KM)
 sf@data$SA22018__1[laper > 0.1 & laper < 0.4]
+# Filter out: chatham islands (due to meridian issues) + areas more than 10% water
 plot(ssf2.5[(laper > 0.1) & ci,])
 writeOGR(ssf2.5[(laper > 0.1) & ci,], dsn = "shapefiles/sa20025WGSfil/", layer = "SA2", driver="ESRI Shapefile")

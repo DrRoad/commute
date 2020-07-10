@@ -1,33 +1,8 @@
+# Process csv data into an RData file to be loaded by the shiny application
 library(readr)
-library(ggplot2)
 library(dplyr)
-library(igraph)
 education_travel <- read_csv("travel-education.csv")
 work_travel <- read_csv("travel-work.csv")
-length(unique(education_travel$SA2_name_usual_residence_address))
-length(unique(education_travel$SA2_name_educational_address))
-length(unique(work_travel$SA2_name_usual_residence_address))
-length(unique(work_travel$SA2_name_workplace_address))
-
-ggplot(work_travel, aes(x = SA2_code_usual_residence_address, 
-                        y = SA2_code_workplace_address,
-                        fill = Total)) +
-  geom_tile()
-
-g2 <- graph( edges=c(4,9, 9,6, 6, 4, 1,2, 5,6, 9,5, 1,4, 1,5, 2,6, 3,3, 6,6), n=10 )
-plot(g2)
-
-tg <- make_empty_graph()
-
-work_travel %>% filter(Total > 100) %>% select(SA2_name_usual_residence_address, SA2_name_workplace_address) %>% 
-  as.matrix %>% t %>% as.vector -> elist
-
-locgraph <- graph(edges = elist)
-
-# plot(locgraph, label = NA)
-
-sg <- decompose(locgraph, mode="weak")
-
 
 work_travel %>% select(
   res_code = SA2_code_usual_residence_address,
@@ -144,8 +119,6 @@ edu_simp %>% group_by(edu_code, edu_name, edu_east, edu_north) %>%
 
 tencols <-  c("#f85654", "#e31a1c", "#1f78b4", "#6a3d9a", "#b2df8a", 
               "#33a02c", "#fdbf6f", "#ff7f00", "#cab2d6", "#af8ac1")
-tencols[which.max(work_from[1, 5:14])]
-
 
 work_from$MAX <- work_from %>% select(private:home) %>% as.matrix() %>% 
   apply(1, function(x) {
@@ -174,4 +147,3 @@ edu_simp$MAX <- edu_simp %>% select(drive:home) %>% as.matrix() %>%
     })
 
 save(work_simp, work_to, work_from, edu_simp, edu_to, edu_from, tencols, file="viz/datasets.RData")
-
