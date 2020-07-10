@@ -112,7 +112,7 @@ ui <- fluidPage(
                  status_off = "primary",
                  value = TRUE)
   ),
-  absolutePanel(top = 40, right = 6, id="control2", title="Toggle panel",
+  absolutePanel(top = 40, right = 6, id="control2", title="Toggle pane(L)",
                 prettySwitch("controlswitch", value=TRUE, label = NULL,
                              slim = FALSE,
                                inline=TRUE, status="info",
@@ -348,8 +348,13 @@ server <- function(input, output) {
     updateMap()
   })
   observeEvent(input$controlswitch, ignoreInit = TRUE, {
-    shinyjs::toggleElement("mapcontrol", anim=TRUE,
-                           time = 0.5)
+    if (input$controlswitch) {
+      shinyjs::showElement("mapcontrol", anim=TRUE,
+                             time = 0.5)
+    } else {
+      shinyjs::hideElement("mapcontrol", anim=TRUE,
+                             time = 0.5)
+    }
   })
   observeEvent(input$mapinfobutton, ignoreInit = TRUE, {
     if (input$mapinfobutton) {
