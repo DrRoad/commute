@@ -154,8 +154,8 @@ title="A JS library for interactive maps">Leaflet</a> | <a
 href="http://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
 title="Source data">
 StatsNZ</a> | <a href="http://petras.space/" title="Hire me!">
-Petra Lamborn</a> (<a href="https://github.com/PetraOleum/commute"
-title="Source code">Source</a>)
+Petra Lamborn</a> (2020) | <a href="http://github.com/PetraOleum/commute"
+title="Github link">Source code</a>
 '
 
 infotext <- div(class="overflowable", id="infoint", tabindex="2",
