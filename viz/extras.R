@@ -154,7 +154,7 @@ title="A JS library for interactive maps">Leaflet</a> | <a
 href="http://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/"
 title="Source data">
 StatsNZ</a> | <a href="http://petras.space/" title="Hire me!">
-Petra Lamborn</a> (<a href="https://git.petras.space/petra/commute"
+Petra Lamborn</a> (<a href="https://github.com/PetraOleum/commute"
 title="Source code">Source</a>)
 '
 
@@ -163,6 +163,7 @@ infotext <- div(class="overflowable", id="infoint", tabindex="2",
   p("This tool maps the 2018 census",
   a(href=
     "https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/", 
+    title="Datafinder link",
     "commuter data"), 
   "to help visualise transport ",
     "connections. It is ", a(href="http://petras.space", title="Hire me!",
@@ -170,7 +171,8 @@ infotext <- div(class="overflowable", id="infoint", tabindex="2",
     " entry for the ", em("There and Back Again"),
     a(href=
 "https://www.stats.govt.nz/2018-census/there-and-back-
-again-data-visualisation-competition", "data visualisation competition",
+again-data-visualisation-competition", title="June-July 2020",
+    "data visualisation competition",
     .noWS = "after"), 
     HTML(". The employment portion of the dataset captures employed persons ",
     "15 years or older who gave an employment address or location ",
@@ -179,28 +181,36 @@ again-data-visualisation-competition", "data visualisation competition",
     "gave an education location in the 2018 census, ",
     "including older highschoolers and ",
     "university students but not e.g. primary school students.")),
+  p("The source code for this project can be found on GitHub",
+    a(href="https://github.com/PetraOleum/commute", 
+      title="Github link",
+      "here", .noWS = "after"), "."),
   h4("The data"),
   p("The 2018 New Zealand Census of Population and Dwellings",
     a(href=paste0("https://cdm20045.contentdm.oclc.org/digital/",
-      "collection/p20045coll2/id/713/rec/3"), "questionnaire"), 
+      "collection/p20045coll2/id/713/rec/3"),
+      title="pdf of paper version of the individual questionnaire",
+      "questionnaire"), 
     "asked individuals for primary locations of employment and education ",
     "and their usual method of transportation. Stats NZ has",
     a(href=
 "https://datafinder.stats.govt.nz/data/category/census/2018/commuter-view/",
+    title="Datafinder link",
       "released data"),
     "aggregated at the level of", 
     a(href=paste0(
 "http://archive.stats.govt.nz/methods/classifications-and-standards/",
 "classification-related-stats-standards/geographic-areas/pg4.aspx#gsc.tab=0"),
-   "Statistical Area 2", .noWS = "after"), ".",
-    shiny::tags$abbr(title = "Statistical Area 2", "SA2"),
-    "boundaries typically enclose areas with a population of a few ",
+    title="Definition of statistical areas, 2018",
+   "Statistical Area 2"), "(SA2). ",
+    "SA2 boundaries typically enclose areas with a population of a few ",
     "thousand, corresponding approximately to urban suburbs and rural towns. ",
     "The shapes of these areas have been heavily simplified in this map ",
     "to reduce bandwidth and memory usage. ",
     "The original boundaries can be viewed and downloaded",
     a(href=
 "https://datafinder.stats.govt.nz/layer/92212-statistical-area-2-2018-generalised/",
+    title="Shapefiles avaliable on datafinder",
     "from the Stats NZ datafinder website", .noWS = "after"), "."),
   h4("Using this tool"),
   p("The options avaliable allow ",
@@ -251,6 +261,7 @@ again-data-visualisation-competition", "data visualisation competition",
     em(a(href=paste0(
       "http://archive.stats.govt.nz/about_us/legisln-policies-protocols/",
       "confidentiality-of-info-supplied-to-snz/safeguarding-confidentiality.aspx"),
+      title="A method of preserving confidentiality and anonymity",
          "random rounding", .noWS = "after"), .noWS = "after"), ". ",
     "This method rounds all values to a multiple of three, but one-third of ",
     "the time rounds to the second nearest multiple, rather than the closest. ",
