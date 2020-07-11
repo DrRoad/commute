@@ -240,6 +240,7 @@ again-data-visualisation-competition", title="June-July 2020",
                      shiny::tags$kbd(HTML("&darr;")),
                      ": move map")
     ),
+    shiny::tags$li(shiny::tags$kbd("R"), ": reset map position"),
     shiny::tags$li(shiny::tags$kbd("S"), ": search map"),
     shiny::tags$li(shiny::tags$kbd("L"), ": show/hide options panel"),
     shiny::tags$li(shiny::tags$kbd("P"), ": show employment data"),
@@ -338,6 +339,10 @@ $(function(){
       case 'l':
       case 'L':
         document.getElementById('controlswitch').click();
+        break;
+      case 'r':
+      case 'R':
+        document.getElementsByClassName('easy-button-button')[0].click()
         break;
       default:
         break;
